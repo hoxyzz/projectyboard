@@ -108,7 +108,7 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
 
 // ─── Full Issue Detail Page ─────────────────────────────
 
-export default function IssueDetailPage() {
+export function IssueDetailView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: issue, isLoading } = useIssue(id ?? "");

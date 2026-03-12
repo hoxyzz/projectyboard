@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { Providers } from "@/components/providers";
+import AppLayout from "@/layouts/AppLayout";
 
 export const metadata: Metadata = {
   title: "Orbit Dock",
@@ -29,7 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
-        <div id="root">{children}</div>
+        <div id="root">
+          <Providers>
+            <AppLayout>
+              {children}
+            </AppLayout>
+          </Providers>
+        </div>
       </body>
     </html>
   );
