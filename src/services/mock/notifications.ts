@@ -37,6 +37,11 @@ export function createMockNotificationService(): NotificationService {
       if (n) n.read = true;
     },
 
+    async markAsUnread(id: string) {
+      const n = notifications.find((n) => n.id === id);
+      if (n) n.read = false;
+    },
+
     async markAllAsRead() {
       notifications.forEach((n) => (n.read = true));
     },

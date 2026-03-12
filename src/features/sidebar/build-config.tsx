@@ -81,6 +81,7 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         icon: Inbox,
         badge: { count: inboxCount },
         href: "/inbox",
+        shortcut: "G I",
       },
       {
         id: "reviews",
@@ -88,6 +89,7 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         icon: GitPullRequest,
         badge: { count: reviewCount },
         href: "/reviews",
+        shortcut: "G R",
       },
       {
         id: "my-issues",
@@ -95,6 +97,7 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         icon: CircleUser,
         badge: { count: myIssuesCount },
         href: "/my-issues",
+        shortcut: "G B",
       },
     ],
     sections: [
@@ -104,8 +107,8 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         collapsible: true,
         defaultOpen: true,
         items: [
-          { id: "projects", label: "Projects", icon: FolderKanban, href: "/projects" },
-          { id: "views", label: "Views", icon: Eye, href: "/views" },
+          { id: "projects", label: "Projects", icon: FolderKanban, href: "/projects", shortcut: "G P" },
+          { id: "views", label: "Views", icon: Eye, href: "/views", shortcut: "G V" },
           { id: "more", label: "More", icon: MoreHorizontal, href: "/views" },
         ],
         contextMenu: {
@@ -140,7 +143,6 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         ],
       },
     })),
-    // Footer items removed: no more "Try import issues" / "Invite people"
     footerItems: [],
     footerSlot: (
       <div className="flex flex-col gap-0.5">

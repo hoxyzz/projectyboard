@@ -35,16 +35,18 @@ const SECTIONS = [
     shortcuts: [
       { keys: ["↓", "/", "J"], label: "Move down" },
       { keys: ["↑", "/", "K"], label: "Move up" },
-      { keys: ["Enter"], label: "Open detail view" },
-      { keys: ["Space"], label: "Toggle preview" },
-      { keys: ["O"], label: "Open full issue view" },
+      { keys: ["Enter"], label: "Open item" },
+      { keys: ["Space"], label: "Toggle read / select" },
+      { keys: ["O"], label: "Open full view" },
     ],
   },
   {
     title: "Inbox",
     shortcuts: [
-      { keys: ["⇧", "R"], label: "Toggle read/unread" },
-      { keys: ["⇧", "A", "R"], label: "Mark all as read" },
+      { keys: ["A", "R"], label: "Toggle read/unread" },
+      { keys: ["A", "R", "A"], label: "Mark all as read" },
+      { keys: ["1"], label: "Filter: All" },
+      { keys: ["2"], label: "Filter: Unread" },
     ],
   },
   {
