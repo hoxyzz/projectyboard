@@ -1,8 +1,8 @@
 /**
  * Sidebar configuration factory.
- * 
+ *
  * Accepts data from hooks/services and returns a SidebarConfig.
- * This keeps the config declarative while allowing dynamic data injection.
+ * Items can be toggled centrally via the `enabled` flag pattern.
  */
 import {
   Inbox,
@@ -11,7 +11,6 @@ import {
   FolderKanban,
   Eye,
   MoreHorizontal,
-  UserPlus,
   Search,
   Bell,
   Settings,
@@ -21,7 +20,6 @@ import {
   MessageSquare,
   LogOut,
   CircleDot,
-  Import,
 } from "lucide-react";
 import type { SidebarConfig } from "@/features/sidebar";
 import type { OptionalAction } from "@/types";
@@ -30,16 +28,14 @@ export interface SidebarConfigParams {
   userName: string;
   inboxCount: number;
   reviewCount: number;
+  myIssuesCount: number;
   teams: Array<{
     id: string;
     name: string;
     color?: string;
   }>;
-  /** Callbacks — all optional, wire up as backend becomes available */
   onSearch?: OptionalAction;
   onNotifications?: OptionalAction;
-  onInvitePeople?: OptionalAction;
-  onImportIssues?: OptionalAction;
   onTeamSettings?: OptionalAction<string>;
   onLeaveTeam?: OptionalAction<string>;
   onNavigate?: OptionalAction<string>;
@@ -50,14 +46,12 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
     userName,
     inboxCount,
     reviewCount,
+    myIssuesCount,
     teams,
     onSearch,
     onNotifications,
-    onInvitePeople,
-    onImportIssues,
     onTeamSettings,
     onLeaveTeam,
-    onNavigate,
   } = params;
 
   return {
@@ -99,6 +93,7 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         id: "my-issues",
         label: "My issues",
         icon: CircleUser,
+        badge: { count: myIssuesCount },
         href: "/my-issues",
       },
     ],
@@ -145,10 +140,8 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
         ],
       },
     })),
-    footerItems: [
-      { id: "import", label: "Import issues", icon: Import, action: () => onImportIssues?.() },
-      { id: "invite", label: "Invite people", icon: UserPlus, action: () => onInvitePeople?.() },
-    ],
+    // Footer items removed: no more "Try import issues" / "Invite people"
+    footerItems: [],
     footerSlot: (
       <div className="flex flex-col gap-0.5">
         <span className="text-[11px] text-li-text-muted">What's new</span>
