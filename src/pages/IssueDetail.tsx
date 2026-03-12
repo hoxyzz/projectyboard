@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useIssue, useUpdateIssue } from "@/hooks/use-issues";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ import {
   PriorityIcon,
   StatusIcon,
 } from "@/features/issues/issue-detail-panel";
+import { useRouteShortcuts } from "@/hooks/use-route-shortcuts";
 
 // ─── Activity Item (full version) ───────────────────────
 
@@ -112,11 +113,37 @@ export default function IssueDetailPage() {
   const navigate = useNavigate();
   const { data: issue, isLoading } = useIssue(id ?? "");
   const updateIssue = useUpdateIssue();
+  const editorRef = useRef<HTMLTextAreaElement | null>(null);
 
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState("");
   const [editingDesc, setEditingDesc] = useState(false);
   const [descValue, setDescValue] = useState("");
+
+  // ─── Route shortcuts ─────────────────────────────────
+  useRouteShortcuts({
+    onEdit: () => {
+      if (!editingDesc && issue) {
+        setDescValue(issue.description ?? "");
+        setEditingDesc(true);
+        // Focus textarea after render
+        setTimeout(() => editorRef.current?.focus(), 50);
+      }
+    },
+    onFocusInput: () => {
+      if (!editingDesc && issue) {
+        setDescValue(issue.description ?? "");
+        setEditingDesc(true);
+        setTimeout(() => editorRef.current?.focus(), 50);
+      }
+    },
+    onSave: () => {
+      if (editingDesc && issue) {
+        updateIssue.mutate({ id: issue.id, input: { title: issue.title } });
+        setEditingDesc(false);
+      }
+    },
+  });
 
   if (isLoading) {
     return (
@@ -157,7 +184,7 @@ export default function IssueDetailPage() {
   };
 
   const handleDescSave = () => {
-    updateIssue.mutate({ id: issue.id, input: { title: issue.title } }); // triggers update timestamp
+    updateIssue.mutate({ id: issue.id, input: { title: issue.title } });
     setEditingDesc(false);
   };
 
@@ -262,7 +289,6 @@ export default function IssueDetailPage() {
 
             {/* Right sidebar properties */}
             <div className="w-[220px] shrink-0 space-y-5">
-              {/* Status */}
               <PropertyBlock label="Status">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -290,7 +316,6 @@ export default function IssueDetailPage() {
                 </DropdownMenu>
               </PropertyBlock>
 
-              {/* Priority */}
               <PropertyBlock label="Priority">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -317,7 +342,6 @@ export default function IssueDetailPage() {
                 </DropdownMenu>
               </PropertyBlock>
 
-              {/* Assignee */}
               <PropertyBlock label="Assignee">
                 <div className="flex items-center gap-2 px-2 py-1 -ml-2">
                   <div className="h-5 w-5 rounded-full bg-li-dot-blue/20 flex items-center justify-center">
@@ -329,7 +353,6 @@ export default function IssueDetailPage() {
                 </div>
               </PropertyBlock>
 
-              {/* Labels */}
               <PropertyBlock label="Labels">
                 {issue.labels.length > 0 ? (
                   <div className="flex flex-wrap gap-1.5 px-2 -ml-2">
@@ -348,21 +371,18 @@ export default function IssueDetailPage() {
                 )}
               </PropertyBlock>
 
-              {/* Project */}
               {issue.projectName && (
                 <PropertyBlock label="Project">
                   <span className="text-[12.5px] text-li-text px-2 -ml-2">{issue.projectName}</span>
                 </PropertyBlock>
               )}
 
-              {/* Parent */}
               {issue.parentTitle && (
                 <PropertyBlock label="Parent issue">
                   <span className="text-[12.5px] text-li-text px-2 -ml-2">› {issue.parentTitle}</span>
                 </PropertyBlock>
               )}
 
-              {/* Dates */}
               <PropertyBlock label="Created">
                 <span className="text-[12px] text-li-text-muted px-2 -ml-2">
                   {format(new Date(issue.createdAt), "MMM d, yyyy")}

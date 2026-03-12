@@ -1,52 +1,52 @@
-import { Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useMemo, useState } from "react";
 import { SidebarRoot } from "@/features/sidebar";
 import { buildSidebarConfig } from "@/features/sidebar/build-config";
 import { useCurrentUser } from "@/hooks/use-user";
-import { useUnreadCount } from "@/hooks/use-notifications";
 import { useTeams } from "@/hooks/use-teams";
+import { useCounterStore } from "@/stores/counter-store";
 import { SearchCommand } from "@/components/search-command";
 import { ShortcutCheatsheet } from "@/components/shortcut-cheatsheet";
 import { useShortcut } from "@remcostoeten/use-shortcut";
 
-/**
- * Shell layout — sidebar + routed content area.
- */
 export default function AppLayout() {
   const navigate = useNavigate();
-  const location = useLocation();
   const { data: user } = useCurrentUser();
-  const { data: unreadCount } = useUnreadCount();
   const { data: teams } = useTeams();
   const [searchOpen, setSearchOpen] = useState(false);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
+
+  // Reactive counters from shared store
+  const inboxCount = useCounterStore((s) => s.counts.inbox);
+  const reviewCount = useCounterStore((s) => s.counts.reviews);
+  const myIssuesCount = useCounterStore((s) => s.counts["my-issues"]);
 
   // ─── Global keyboard shortcuts ─────────────────────────
   const $ = useShortcut({ ignoreInputs: true, sequenceTimeout: 600 });
 
   // Search: Cmd/Ctrl + K
-  $.mod.key("k").on(() => setSearchOpen(true));
+  $.mod.key("k").on(() => setSearchOpen(true), { preventDefault: true });
 
-  // Route sequences: Shift+G then letter
-  $.shift.key("g").then("i").on(() => navigate("/inbox"));
-  $.shift.key("g").then("r").on(() => navigate("/reviews"));
-  $.shift.key("g").then("m").on(() => navigate("/my-issues"));
-  $.shift.key("g").then("p").on(() => navigate("/projects"));
-  $.shift.key("g").then("v").on(() => navigate("/views"));
+  // Navigation sequences: g then letter
+  $.key("g").then("i").on(() => navigate("/inbox"));
+  $.key("g").then("r").on(() => navigate("/reviews"));
+  $.key("g").then("b").on(() => navigate("/my-issues"));
+  $.key("g").then("m").on(() => navigate("/my-issues"));
+  $.key("g").then("p").on(() => navigate("/projects"));
+  $.key("g").then("v").on(() => navigate("/views"));
 
-  // Notification bell: Shift+N then N
-  $.shift.key("n").then("n").on(() => navigate("/inbox"));
+  // Cheatsheet: ?  (Shift+/ on most keyboards)
+  $.shift.key("/").except("typing").on(() => setCheatsheetOpen(true));
 
-  // Cheatsheet: Shift+?
-  // Cheatsheet: Shift+/ (which is ? on most keyboards)
-  $.shift.key("/").on(() => setCheatsheetOpen(true));
+  // Sidebar toggle: Cmd/Ctrl + B (handled in sidebar-root)
 
   const sidebarConfig = useMemo(
     () =>
       buildSidebarConfig({
         userName: user?.name ?? "…",
-        inboxCount: unreadCount ?? 0,
-        reviewCount: 2,
+        inboxCount,
+        reviewCount,
+        myIssuesCount,
         teams: (teams ?? []).map((t) => ({
           id: t.id,
           name: t.name,
@@ -54,13 +54,11 @@ export default function AppLayout() {
         })),
         onSearch: () => setSearchOpen(true),
         onNotifications: () => navigate("/inbox"),
-        onInvitePeople: null,
-        onImportIssues: null,
         onTeamSettings: null,
         onLeaveTeam: null,
         onNavigate: (path: string) => navigate(`/${path}`),
       }),
-    [user, unreadCount, teams, navigate]
+    [user, inboxCount, reviewCount, myIssuesCount, teams, navigate]
   );
 
   return (

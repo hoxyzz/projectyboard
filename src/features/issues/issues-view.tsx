@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useRef } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronDown,
@@ -27,12 +27,16 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
 import { Kbd } from "@/components/kbd";
-import { useShortcut } from "@remcostoeten/use-shortcut";
+import { useCounterStore } from "@/stores/counter-store";
+import { useRouteShortcuts } from "@/hooks/use-route-shortcuts";
 
 // ─── Constants ──────────────────────────────────────────
 
 type SortField = "priority" | "status" | "title" | "updatedAt";
 type SortDir = "asc" | "desc";
+
+/** Default tracked status for My Issues counter */
+const TRACKED_STATUSES: IssueStatus[] = ["in_progress"];
 
 const PRIORITY_ORDER: Record<Priority, number> = {
   urgent: 0, high: 1, medium: 2, low: 3, none: 4,
@@ -274,16 +278,33 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
   const [focusedIdx, setFocusedIdx] = useState(-1);
   const navigate = useNavigate();
   const listRef = useRef<HTMLDivElement>(null);
+  const setCount = useCounterStore((s) => s.setCount);
 
   const { data, isLoading } = useIssues();
   const updateIssue = useUpdateIssue();
 
-  // Shortcut: C to create
-  const $ = useShortcut({ ignoreInputs: true });
-  $.key("c").on(() => setCreateOpen(true));
+  // Push "in_progress" issue count to sidebar counter store
+  const allIssues = data?.data ?? [];
+  const trackedCount = useMemo(
+    () => allIssues.filter((i) => TRACKED_STATUSES.includes(i.status)).length,
+    [allIssues]
+  );
+  useEffect(() => {
+    setCount("my-issues", trackedCount);
+  }, [trackedCount, setCount]);
+
+  // ─── Route shortcuts ────────────────────────────────
+  useRouteShortcuts({
+    onNew: () => setCreateOpen(true),
+    onOpen: () => {
+      if (focusedIdx >= 0 && flatIssues[focusedIdx]) {
+        navigate(`/issues/${flatIssues[focusedIdx].id}`);
+      }
+    },
+  });
 
   const issues = useMemo(() => {
-    let result = data?.data ?? [];
+    let result = allIssues;
     if (statusFilter.length) result = result.filter((i) => statusFilter.includes(i.status));
     if (priorityFilter.length) result = result.filter((i) => priorityFilter.includes(i.priority));
 
@@ -298,9 +319,8 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
       return sortDir === "desc" ? -cmp : cmp;
     });
     return result;
-  }, [data, statusFilter, priorityFilter, sortField, sortDir]);
+  }, [allIssues, statusFilter, priorityFilter, sortField, sortDir]);
 
-  // Flatten for keyboard nav
   const flatIssues = useMemo(() => {
     const groups: Record<string, Issue[]> = {};
     for (const issue of issues) {
@@ -367,7 +387,6 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 
   const activeFilters = statusFilter.length + priorityFilter.length;
 
-  // Build a flat index for focus tracking
   let flatIndex = 0;
 
   return (
@@ -375,7 +394,7 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
       {/* Header */}
       <div className="flex items-center justify-between h-11 px-4 border-b border-li-content-border shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-[14px] font-medium text-li-text-bright">All in one dashboard</span>
+          <span className="text-[14px] font-medium text-li-text-bright">My Issues</span>
           {activeFilters > 0 && (
             <span className="text-[10px] text-li-text-badge bg-li-badge-bg rounded-full px-1.5 py-0.5">
               {activeFilters} filter{activeFilters > 1 ? "s" : ""}
@@ -389,7 +408,7 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
           >
             <Plus className="h-3 w-3" />
             New
-            <Kbd keys={["C"]} className="ml-0.5" />
+            <Kbd keys={["N"]} className="ml-0.5" />
           </button>
           <MultiFilterDropdown label="Status" options={STATUS_OPTIONS} selected={statusFilter} onChange={setStatusFilter} />
           <MultiFilterDropdown label="Priority" options={PRIORITY_OPTIONS} selected={priorityFilter} onChange={setPriorityFilter} />
@@ -412,7 +431,6 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
         ) : (
           grouped.map(([status, groupIssues]) => {
             const statusOpt = STATUS_OPTIONS.find((s) => s.value === status);
-            const groupStartIdx = flatIndex;
             return (
               <div key={status}>
                 <div className="flex items-center h-[30px] px-4 sticky top-0 bg-li-content-bg z-10">

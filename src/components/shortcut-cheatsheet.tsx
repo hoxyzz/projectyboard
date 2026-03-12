@@ -14,20 +14,20 @@ const SECTIONS = [
   {
     title: "Navigation",
     shortcuts: [
-      { keys: ["⇧", "G", "I"], label: "Go to Inbox" },
-      { keys: ["⇧", "G", "R"], label: "Go to Reviews" },
-      { keys: ["⇧", "G", "M"], label: "Go to My Issues" },
-      { keys: ["⇧", "G", "P"], label: "Go to Projects" },
-      { keys: ["⇧", "G", "V"], label: "Go to Views" },
+      { keys: ["G", "I"], label: "Go to Inbox" },
+      { keys: ["G", "R"], label: "Go to Reviews" },
+      { keys: ["G", "B"], label: "Go to My Issues" },
+      { keys: ["G", "P"], label: "Go to Projects" },
+      { keys: ["G", "V"], label: "Go to Views" },
     ],
   },
   {
     title: "Actions",
     shortcuts: [
       { keys: [mod, "K"], label: "Open search" },
-      { keys: ["C"], label: "Create new issue" },
-      { keys: ["⇧", "N", "N"], label: "Open notifications" },
-      { keys: ["⇧", "?"], label: "Show this cheatsheet" },
+      { keys: ["N"], label: "Create new issue" },
+      { keys: ["?"], label: "Show this cheatsheet" },
+      { keys: [mod, "B"], label: "Toggle sidebar" },
     ],
   },
   {
@@ -37,14 +37,22 @@ const SECTIONS = [
       { keys: ["↑", "/", "K"], label: "Move up" },
       { keys: ["Enter"], label: "Open detail view" },
       { keys: ["Space"], label: "Toggle preview" },
+      { keys: ["O"], label: "Open full issue view" },
     ],
   },
   {
     title: "Inbox",
     shortcuts: [
-      { keys: ["A", mod, mod], label: "Show all" },
-      { keys: ["⇧", "U"], label: "Show unread" },
-      { keys: ["⇧", "R", "E"], label: "Mark all read" },
+      { keys: ["⇧", "R"], label: "Toggle read/unread" },
+      { keys: ["⇧", "A", "R"], label: "Mark all as read" },
+    ],
+  },
+  {
+    title: "Issue Detail",
+    shortcuts: [
+      { keys: ["E"], label: "Focus editor" },
+      { keys: ["/"], label: "Focus input" },
+      { keys: ["Alt", "S"], label: "Save editor" },
     ],
   },
   {
@@ -80,7 +88,6 @@ export function ShortcutCheatsheet({ open, onOpenChange }: ShortcutCheatsheetPro
       }}
     >
       <div className="bg-li-bg border border-li-border rounded-lg shadow-2xl w-full max-w-[640px] max-h-[80vh] overflow-auto">
-        {/* Header */}
         <div className="flex items-center justify-between px-5 py-3 border-b border-li-border sticky top-0 bg-li-bg z-10">
           <h2 className="text-[14px] font-semibold text-li-text-bright">Keyboard Shortcuts</h2>
           <button
@@ -91,7 +98,6 @@ export function ShortcutCheatsheet({ open, onOpenChange }: ShortcutCheatsheetPro
           </button>
         </div>
 
-        {/* Body */}
         <div className="grid grid-cols-2 gap-x-6 gap-y-5 p-5">
           {SECTIONS.map((section) => (
             <div key={section.title}>

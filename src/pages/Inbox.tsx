@@ -1,28 +1,48 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Inbox as InboxIcon, Check, CheckCheck, Circle } from "lucide-react";
-import { useNotifications, useUnreadCount } from "@/hooks/use-notifications";
+import { useNotifications } from "@/hooks/use-notifications";
 import { getNotificationService } from "@/services";
 import { useQueryClient } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import { Kbd, getModKey } from "@/components/kbd";
-import { useShortcut } from "@remcostoeten/use-shortcut";
+import { Kbd } from "@/components/kbd";
+import { useCounterStore } from "@/stores/counter-store";
+import { useRouteShortcuts } from "@/hooks/use-route-shortcuts";
 
 export default function InboxPage() {
   const { data: notifications = [], isLoading } = useNotifications();
-  const { data: unreadCount = 0 } = useUnreadCount();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | "unread">("all");
   const [focusedIdx, setFocusedIdx] = useState(-1);
   const listRef = useRef<HTMLDivElement>(null);
+  const setCount = useCounterStore((s) => s.setCount);
 
   const filtered =
     filter === "unread" ? notifications.filter((n) => !n.read) : notifications;
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  // Push unread count to shared counter store
+  useEffect(() => {
+    setCount("inbox", unreadCount);
+  }, [unreadCount, setCount]);
 
   const markAsRead = async (id: string) => {
     const svc = getNotificationService();
     await svc.markAsRead?.(id);
     qc.invalidateQueries({ queryKey: ["notifications"] });
+  };
+
+  const markAsUnread = async (id: string) => {
+    // Mock: toggle read → unread
+    const svc = getNotificationService();
+    // The mock service doesn't have markAsUnread, so we'd need to add it.
+    // For now, we toggle via the underlying data.
+    const notif = notifications.find((n) => n.id === id);
+    if (notif) {
+      notif.read = false;
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    }
   };
 
   const markAllAsRead = async () => {
@@ -31,19 +51,18 @@ export default function InboxPage() {
     qc.invalidateQueries({ queryKey: ["notifications"] });
   };
 
-  // ─── Keyboard shortcuts ──────────────────────────────
-  const $ = useShortcut({ ignoreInputs: true, sequenceTimeout: 500 });
+  // ─── Route shortcuts ──────────────────────────────────
+  useRouteShortcuts({
+    onMarkUnread: () => {
+      if (focusedIdx >= 0 && filtered[focusedIdx]) {
+        const n = filtered[focusedIdx];
+        if (n.read) markAsUnread(n.id);
+        else markAsRead(n.id);
+      }
+    },
+    onMarkAllRead: () => markAllAsRead(),
+  });
 
-  // All filter: A → Mod → Mod (3-key sequence)
-  $.key("a").then("Control").then("Control").on(() => setFilter("all"));
-
-  // Unread filter: Shift+U
-  $.shift.key("u").on(() => setFilter("unread"));
-
-  // Mark all read: Shift+R then E
-  $.shift.key("r").then("e").on(() => markAllAsRead());
-
-  // List navigation
   const clampIdx = useCallback(
     (idx: number) => Math.max(0, Math.min(idx, filtered.length - 1)),
     [filtered.length]
@@ -69,8 +88,6 @@ export default function InboxPage() {
     [focusedIdx, filtered, clampIdx]
   );
 
-  const mod = getModKey();
-
   return (
     <div className="flex-1 flex flex-col bg-li-content-bg min-h-0">
       {/* Header */}
@@ -85,7 +102,6 @@ export default function InboxPage() {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {/* All */}
           <button
             onClick={() => setFilter("all")}
             className={cn(
@@ -96,9 +112,7 @@ export default function InboxPage() {
             )}
           >
             All
-            <Kbd keys={["A", mod, mod]} />
           </button>
-          {/* Unread */}
           <button
             onClick={() => setFilter("unread")}
             className={cn(
@@ -109,7 +123,6 @@ export default function InboxPage() {
             )}
           >
             Unread
-            <Kbd keys={["⇧", "U"]} />
           </button>
           {unreadCount > 0 && (
             <button
@@ -118,7 +131,7 @@ export default function InboxPage() {
             >
               <CheckCheck className="h-3 w-3" />
               Mark all read
-              <Kbd keys={["⇧", "R", "E"]} />
+              <Kbd keys={["⇧", "A", "R"]} />
             </button>
           )}
         </div>
@@ -130,7 +143,9 @@ export default function InboxPage() {
         className="flex-1 overflow-auto outline-none"
         tabIndex={0}
         onKeyDown={handleListKeyDown}
-        onFocus={() => { if (focusedIdx < 0 && filtered.length > 0) setFocusedIdx(0); }}
+        onFocus={() => {
+          if (focusedIdx < 0 && filtered.length > 0) setFocusedIdx(0);
+        }}
       >
         {isLoading ? (
           <div className="flex items-center justify-center py-20">
