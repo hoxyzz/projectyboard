@@ -1,8 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Client-side SPA mode - no SSR
-  output: "export",
   // Skip type checking during build (handled by IDE/CI)
   typescript: {
     ignoreBuildErrors: false,
