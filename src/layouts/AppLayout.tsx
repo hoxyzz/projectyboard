@@ -1,3 +1,5 @@
+'use client';
+
 import { useNavigate } from "@/lib/navigation";
 import { useMemo, useState, ReactNode } from "react";
 import { SidebarRoot } from "@/features/sidebar";
