@@ -7,7 +7,7 @@ import type { NavItem } from './types'
 import { SidebarContextMenu } from './sidebar-context-menu'
 import { useSidebarStore } from './store'
 
-interface SidebarItemProps {
+type SidebarItemProps = {
 	item: NavItem
 	indent?: boolean | number
 }

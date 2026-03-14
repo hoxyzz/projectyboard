@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils'
 
-interface KbdProps {
+type KbdProps = {
 	keys: string[]
 	className?: string
 }

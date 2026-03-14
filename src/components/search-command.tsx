@@ -15,7 +15,7 @@ import {
 import { useIssues } from '@/hooks/use-issues'
 import { useNavigate } from '@/lib/navigation'
 
-interface SearchCommandProps {
+type SearchCommandProps = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 }

@@ -10,7 +10,7 @@ import {
 
 import type { ContextMenuConfig } from './types'
 
-interface SidebarContextMenuProps {
+type SidebarContextMenuProps = {
 	config?: ContextMenuConfig
 	children: ReactNode
 }

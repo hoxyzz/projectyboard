@@ -25,7 +25,7 @@ import {
 import type { OptionalAction } from '@/types'
 import type { SidebarConfig } from './types'
 
-export interface SidebarConfigParams {
+export type SidebarConfigParams = {
 	userName: string
 	inboxCount: number
 	reviewCount: number

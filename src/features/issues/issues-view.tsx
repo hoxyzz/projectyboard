@@ -53,7 +53,7 @@ const STATUS_ORDER: Record<IssueStatus, number> = {
 
 // ─── Issue Row ──────────────────────────────────────────
 
-interface IssueRowProps {
+type IssueRowProps = {
 	issue: Issue
 	expanded: boolean
 	focused: boolean
@@ -291,7 +291,7 @@ function SortDropdown({
 
 // ─── Main View ──────────────────────────────────────────
 
-interface IssuesViewProps {
+type IssuesViewProps = {
 	onIssueSelect?: (issue: Issue) => void
 	onFilterChange?: (filters: Record<string, unknown>) => void
 }

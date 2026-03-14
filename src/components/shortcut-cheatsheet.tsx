@@ -6,7 +6,7 @@ import { useEffect, useRef } from 'react'
 import { Kbd, getModKey } from '@/components/kbd'
 import { cn } from '@/lib/utils'
 
-interface ShortcutCheatsheetProps {
+type ShortcutCheatsheetProps = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 }

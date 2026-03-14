@@ -22,7 +22,7 @@ import type {
 	UpdateIssueInput
 } from '../types'
 
-export interface ApiIssueServiceConfig {
+export type ApiIssueServiceConfig = {
 	/** Base URL for the issues endpoint, e.g. "/api" or "https://api.example.com" */
 	baseUrl: string
 	/** Optional auth token injected per-request */

@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils'
 
 export type BulkActionType = 'delete' | 'markRead' | 'markUnread'
 
-interface BulkActionDialogProps {
+type BulkActionDialogProps = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 	actionType: BulkActionType

@@ -2,7 +2,7 @@ import type { NavItem } from './types'
 
 import { SidebarItem } from './sidebar-item'
 
-interface SidebarFooterProps {
+type SidebarFooterProps = {
 	items?: NavItem[]
 	slot?: React.ReactNode
 }

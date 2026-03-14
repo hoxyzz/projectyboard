@@ -11,7 +11,7 @@ import { SidebarContextMenu } from './sidebar-context-menu'
 import { SidebarItem } from './sidebar-item'
 import { useSidebarStore } from './store'
 
-interface SidebarSectionProps {
+type SidebarSectionProps = {
 	section: NavSection
 }
 

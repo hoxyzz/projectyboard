@@ -14,7 +14,7 @@ import { SidebarSection } from './sidebar-section'
 import { SidebarTeam } from './sidebar-team'
 import { useSidebarStore } from './store'
 
-interface SidebarRootProps {
+type SidebarRootProps = {
 	config: SidebarConfig
 }
 

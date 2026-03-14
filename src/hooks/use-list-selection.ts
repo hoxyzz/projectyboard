@@ -2,13 +2,13 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
-export interface SectionGroup<T> {
+export type SectionGroup<T> = {
 	id: string
 	label: string
 	items: T[]
 }
 
-export interface UseListSelectionOptions<T> {
+export type UseListSelectionOptions<T> = {
 	/** Items grouped by section */
 	groups: SectionGroup<T>[]
 	/** Extract unique ID from item */
@@ -21,7 +21,7 @@ export type FocusTarget =
 	| { type: 'section'; sectionIndex: number }
 	| { type: 'item'; sectionIndex: number; itemIndex: number }
 
-export interface UseListSelectionReturn<T> {
+export type UseListSelectionReturn<T> = {
 	/** Currently selected item IDs */
 	selectedIds: Set<string>
 	/** Current focus target (section or item) */

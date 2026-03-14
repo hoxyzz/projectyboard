@@ -17,13 +17,13 @@ import { cn } from '@/lib/utils'
 
 // ─── Navigation Context for Client-Side Routing ─────────────────────
 
-interface RouteConfig {
+type RouteConfig = {
 	path: string
 	element: ReactNode
 	children?: RouteConfig[]
 }
 
-interface NavigationContextValue {
+type NavigationContextValue = {
 	pathname: string
 	routes: RouteConfig[]
 	outlet: ReactNode | null
@@ -95,7 +95,7 @@ export function useParams<T extends Record<string, string> = Record<string, stri
 
 // ─── Link Component ─────────────────────────────────────────────────
 
-interface LinkProps extends Omit<ComponentProps<typeof NextLink>, 'href'> {
+type LinkProps = Omit<ComponentProps<typeof NextLink>, 'href'> & {
 	to: string
 }
 
@@ -109,7 +109,7 @@ export function Link({ to, children, className, ...props }: LinkProps) {
 
 // ─── NavLink Component (with active state) ──────────────────────────
 
-interface NavLinkProps extends Omit<LinkProps, 'className'> {
+type NavLinkProps = Omit<LinkProps, 'className'> & {
 	className?: string | ((props: { isActive: boolean; isPending: boolean }) => string)
 	activeClassName?: string
 	pendingClassName?: string
@@ -143,7 +143,7 @@ export function NavLink({
 
 // ─── Navigate Component (for redirects) ─────────────────────────────
 
-interface NavigateProps {
+type NavigateProps = {
 	to: string
 	replace?: boolean
 }
@@ -171,7 +171,7 @@ export function Outlet() {
 
 // ─── Route Component (declarative route definition) ─────────────────
 
-interface RouteProps {
+type RouteProps = {
 	path?: string
 	element?: ReactNode
 	index?: boolean
@@ -185,7 +185,7 @@ export function Route(_props: RouteProps) {
 
 // ─── Routes Component (client-side router) ──────────────────────────
 
-interface RoutesProps {
+type RoutesProps = {
 	children: ReactNode
 }
 
@@ -364,7 +364,7 @@ export function Routes({ children }: RoutesProps) {
 
 // ─── BrowserRouter Compatibility (no-op wrapper) ────────────────────
 
-interface BrowserRouterProps {
+type BrowserRouterProps = {
 	children: ReactNode
 }
 

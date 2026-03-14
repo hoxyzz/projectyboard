@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-interface SidebarState {
+type SidebarState = {
 	collapsed: boolean
 	activeItemId: string | null
 	openSections: Record<string, boolean>

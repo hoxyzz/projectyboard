@@ -169,7 +169,7 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
 
 // ─── Inline Detail Panel ────────────────────────────────
 
-interface IssueDetailPanelProps {
+type IssueDetailPanelProps = {
 	issue: Issue
 	expanded: boolean
 	onOpenFull: (issue: Issue) => void

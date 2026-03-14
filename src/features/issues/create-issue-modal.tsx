@@ -63,7 +63,7 @@ const createIssueSchema = z.object({
 
 type CreateIssueForm = z.infer<typeof createIssueSchema>
 
-interface CreateIssueModalProps {
+type CreateIssueModalProps = {
 	open: boolean
 	onOpenChange: (open: boolean) => void
 }

@@ -1,17 +1,3 @@
-/**
- * Service layer contracts.
- *
- * Each service is an interface. Implementations can be:
- * - Mock (current, client-side only)
- * - REST/fetch
- * - tRPC / oRPC client
- * - Supabase client
- * - GraphQL
- *
- * Components never import implementations directly — they consume
- * services through hooks that resolve the active implementation.
- */
-
 import type { PaginatedResult } from '@/types'
 
 // ─── Issues ─────────────────────────────────────────────
@@ -19,18 +5,18 @@ import type { PaginatedResult } from '@/types'
 export type Priority = 'urgent' | 'high' | 'medium' | 'low' | 'none'
 export type IssueStatus = 'backlog' | 'todo' | 'in_progress' | 'done' | 'cancelled'
 
-export interface IssueLabel {
+export type IssueLabel = {
 	id: string
 	name: string
 	color: string
 }
 
-export interface SubIssueProgress {
+export type SubIssueProgress = {
 	done: number
 	total: number
 }
 
-export interface ActivityEvent {
+export type ActivityEvent = {
 	id: string
 	type:
 		| 'status_change'
@@ -48,7 +34,7 @@ export interface ActivityEvent {
 	createdAt: string
 }
 
-export interface Issue {
+export type Issue = {
 	id: string
 	identifier: string // e.g. "AIO-19"
 	title: string
@@ -68,7 +54,7 @@ export interface Issue {
 	updatedAt: string
 }
 
-export interface IssueFilters {
+export type IssueFilters = {
 	status?: IssueStatus[]
 	priority?: Priority[]
 	projectId?: string
@@ -76,7 +62,7 @@ export interface IssueFilters {
 	search?: string
 }
 
-export interface IssueService {
+export type IssueService = {
 	list(filters?: IssueFilters): Promise<PaginatedResult<Issue>>
 	getById(id: string): Promise<Issue | null>
 	create(input: CreateIssueInput): Promise<Issue>
@@ -84,7 +70,7 @@ export interface IssueService {
 	delete(id: string): Promise<void>
 }
 
-export interface CreateIssueInput {
+export type CreateIssueInput = {
 	title: string
 	status?: IssueStatus
 	priority?: Priority
@@ -93,7 +79,7 @@ export interface CreateIssueInput {
 	parentId?: string
 }
 
-export interface UpdateIssueInput {
+export type UpdateIssueInput = {
 	title?: string
 	status?: IssueStatus
 	priority?: Priority
@@ -103,42 +89,42 @@ export interface UpdateIssueInput {
 
 // ─── Projects ───────────────────────────────────────────
 
-export interface Project {
+export type Project = {
 	id: string
 	name: string
 	icon?: string
 	color?: string
 }
 
-export interface ProjectService {
+export type ProjectService = {
 	list(): Promise<Project[]>
 	getById(id: string): Promise<Project | null>
 }
 
 // ─── Teams ──────────────────────────────────────────────
 
-export interface Team {
+export type Team = {
 	id: string
 	name: string
 	color?: string
 	memberCount?: number
 }
 
-export interface TeamService {
+export type TeamService = {
 	list(): Promise<Team[]>
 	getById(id: string): Promise<Team | null>
 }
 
 // ─── User / Auth ────────────────────────────────────────
 
-export interface User {
+export type User = {
 	id: string
 	name: string
 	email?: string
 	avatarUrl?: string
 }
 
-export interface UserService {
+export type UserService = {
 	getCurrentUser(): Promise<User | null>
 	// Stubs for future auth
 	login?: (email: string, password: string) => Promise<User>
@@ -147,7 +133,7 @@ export interface UserService {
 
 // ─── Notifications ──────────────────────────────────────
 
-export interface Notification {
+export type Notification = {
 	id: string
 	title: string
 	issueId?: string
@@ -155,7 +141,7 @@ export interface Notification {
 	createdAt: string
 }
 
-export interface NotificationService {
+export type NotificationService = {
 	list(): Promise<Notification[]>
 	markAsRead?: (id: string) => Promise<void>
 	markAsUnread?: (id: string) => Promise<void>

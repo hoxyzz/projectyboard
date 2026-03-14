@@ -14,7 +14,7 @@
  */
 import { useEffect, useRef } from 'react'
 
-export interface RouteActions {
+export type RouteActions = {
 	onNew?: () => void
 	onOpen?: () => void
 	onEdit?: () => void

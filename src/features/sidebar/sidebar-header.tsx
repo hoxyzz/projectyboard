@@ -1,6 +1,6 @@
 import type { UserConfig } from './types'
 
-interface SidebarHeaderProps {
+type SidebarHeaderProps = {
 	user: UserConfig
 }
 

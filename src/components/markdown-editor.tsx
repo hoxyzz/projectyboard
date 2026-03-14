@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown'
 
 import { cn } from '@/lib/utils'
 
-interface MarkdownEditorProps {
+type MarkdownEditorProps = {
 	value: string
 	onChange: (value: string) => void
 	onBlur?: () => void

@@ -12,7 +12,7 @@ import { create } from 'zustand'
 
 export type CounterKey = 'inbox' | 'reviews' | 'my-issues'
 
-interface CounterState {
+type CounterState = {
 	counts: Record<CounterKey, number>
 	setCount: (key: CounterKey, count: number) => void
 	getCount: (key: CounterKey) => number
