@@ -1,3 +1,5 @@
+'use client'
+
 import { IssuesView } from '@/domains/issues/issues-view'
 import { useNavigate } from '@/lib/navigation'
 

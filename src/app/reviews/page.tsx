@@ -1,6 +1,4 @@
-'use client'
-
-import { ReviewsView } from '@/views/reviews-view'
+import { ReviewsView } from './reviews-screen'
 
 export default function ReviewsPage() {
 	return <ReviewsView />

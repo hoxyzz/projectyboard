@@ -1,6 +1,4 @@
-'use client'
-
-import { InboxView } from '@/views/inbox-view'
+import { InboxView } from '@/domains/inbox/inbox-screen'
 
 export default function InboxPage() {
 	return <InboxView />

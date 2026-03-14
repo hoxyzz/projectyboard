@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 
 import { getIssueData } from '@/domains/issues/data'
+import { IssueDetailView } from '@/domains/issues/issue-detail-screen'
 import type { Issue } from '@/domains/issues/types'
-import { IssueDetailView } from '@/views/issue-detail-view'
 
 type PageProps = {
 	params: Promise<{ id: string }>

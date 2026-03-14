@@ -1,3 +1,5 @@
+'use client'
+
 import { GitPullRequest } from 'lucide-react'
 import { useEffect } from 'react'
 
