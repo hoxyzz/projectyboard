@@ -6,7 +6,7 @@ import {
 	ContextMenuItem,
 	ContextMenuSeparator,
 	ContextMenuTrigger
-} from '@/components/ui/context-menu'
+} from '@/shared/components/ui/context-menu'
 
 import type { ContextMenuConfig } from './types'
 

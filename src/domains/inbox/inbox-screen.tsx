@@ -16,14 +16,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Notification } from '@/services/types'
 
-import { BulkActionDialog, type BulkActionType } from '@/components/bulk-action-dialog'
-import { Kbd } from '@/components/kbd'
-import { Checkbox } from '@/components/ui/checkbox'
+import { BulkActionDialog, type BulkActionType } from '@/shared/components/bulk-action-dialog'
+import { Kbd } from '@/shared/components/kbd'
+import { Checkbox } from '@/shared/components/ui/checkbox'
 import { useNotifications } from '@/domains/inbox/hooks/use-notifications'
-import { type SectionGroup, useListSelection } from '@/hooks/use-list-selection'
-import { cn } from '@/lib/utils'
+import { type SectionGroup, useListSelection } from '@/shared/hooks/use-list-selection'
+import { cn } from '@/shared/lib/utils'
 import { getNotificationService } from '@/services'
-import { useCounterStore } from '@/stores/counter-store'
+import { useCounterStore } from '@/shared/stores/counter-store'
 
 // ─── Helpers ────────────────────────────────────────────
 

@@ -3,14 +3,14 @@
 import { useShortcut } from '@remcostoeten/use-shortcut'
 import { ReactNode, useMemo, useState } from 'react'
 
-import { SearchCommand } from '@/components/search-command'
-import { ShortcutCheatsheet } from '@/components/shortcut-cheatsheet'
+import { SearchCommand } from '@/shared/components/search-command'
+import { ShortcutCheatsheet } from '@/shared/components/shortcut-cheatsheet'
 import { buildSidebarConfig } from '@/shell/sidebar/build-config'
 import { SidebarRoot } from '@/shell/sidebar/sidebar-root'
-import { useTeams } from '@/hooks/use-teams'
-import { useCurrentUser } from '@/hooks/use-user'
-import { useNavigate } from '@/lib/navigation'
-import { useCounterStore } from '@/stores/counter-store'
+import { useTeams } from '@/shared/hooks/use-teams'
+import { useCurrentUser } from '@/shared/hooks/use-user'
+import { useNavigate } from '@/shared/lib/navigation'
+import { useCounterStore } from '@/shared/stores/counter-store'
 
 export function AppLayout({ children }: { children?: ReactNode }) {
 	const navigate = useNavigate()

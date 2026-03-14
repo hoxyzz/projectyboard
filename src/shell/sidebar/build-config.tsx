@@ -22,7 +22,7 @@ import {
 	Settings
 } from 'lucide-react'
 
-import type { OptionalAction } from '@/types'
+import type { OptionalAction } from '@/shared/types'
 import type { SidebarConfig } from './types'
 
 export type SidebarConfigParams = {

@@ -16,13 +16,13 @@ import { useRef, useState } from 'react'
 
 import type { ActivityEvent, Issue, IssueStatus, Priority } from '@/domains/issues/types'
 
-import { MarkdownEditor, MarkdownPreview } from '@/components/markdown-editor'
+import { MarkdownEditor, MarkdownPreview } from '@/shared/components/markdown-editor'
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+} from '@/shared/components/ui/dropdown-menu'
 import {
 	PRIORITY_OPTIONS,
 	PriorityIcon,
@@ -30,8 +30,8 @@ import {
 	StatusIcon
 } from '@/domains/issues/issue-detail-panel'
 import { useIssue, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
-import { useNavigate } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import { useNavigate } from '@/shared/lib/navigation'
+import { cn } from '@/shared/lib/utils'
 import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
 
 // ─── Activity Item (full version) ───────────────────────

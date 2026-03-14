@@ -3,7 +3,7 @@
 import { GitPullRequest } from 'lucide-react'
 import { useEffect } from 'react'
 
-import { useCounterStore } from '@/stores/counter-store'
+import { useCounterStore } from '@/shared/stores/counter-store'
 
 export function ReviewsView() {
 	const setCount = useCounterStore((s) => s.setCount)

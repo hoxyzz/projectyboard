@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type { Issue, IssueStatus, Priority } from '@/domains/issues/types'
 
-import { Kbd } from '@/components/kbd'
+import { Kbd } from '@/shared/components/kbd'
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -11,12 +11,12 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+} from '@/shared/components/ui/dropdown-menu'
 import { useIssues, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
-import { useNavigate } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import { useNavigate } from '@/shared/lib/navigation'
+import { cn } from '@/shared/lib/utils'
 import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
-import { useCounterStore } from '@/stores/counter-store'
+import { useCounterStore } from '@/shared/stores/counter-store'
 
 import { CreateIssueModal } from './create-issue-modal'
 import {

@@ -1,6 +1,6 @@
-import { Kbd } from '@/components/kbd'
-import { Link, useLocation } from '@/lib/navigation'
-import { cn } from '@/lib/utils'
+import { Kbd } from '@/shared/components/kbd'
+import { Link, useLocation } from '@/shared/lib/navigation'
+import { cn } from '@/shared/lib/utils'
 
 import type { NavItem } from './types'
 

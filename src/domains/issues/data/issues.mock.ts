@@ -1,4 +1,4 @@
-import type { PaginatedResult } from '@/types'
+import type { PaginatedResult } from '@/shared/types'
 
 import type {
 	ActivityEvent,

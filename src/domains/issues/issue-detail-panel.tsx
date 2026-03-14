@@ -14,16 +14,16 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { ActivityEvent, Issue, IssueStatus, Priority } from '@/domains/issues/types'
 
-import { MarkdownPreview } from '@/components/markdown-editor'
+import { MarkdownPreview } from '@/shared/components/markdown-editor'
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
 	DropdownMenuContent,
 	DropdownMenuLabel,
 	DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
+} from '@/shared/components/ui/dropdown-menu'
 import { useUpdateIssue } from '@/domains/issues/hooks/use-issues'
-import { cn } from '@/lib/utils'
+import { cn } from '@/shared/lib/utils'
 
 // ─── Shared constants ───────────────────────────────────
 

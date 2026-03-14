@@ -1,7 +1,7 @@
 'use client'
 
 import { IssuesView } from '@/domains/issues/issues-view'
-import { useNavigate } from '@/lib/navigation'
+import { useNavigate } from '@/shared/lib/navigation'
 
 export function MyIssuesView() {
 	const navigate = useNavigate()

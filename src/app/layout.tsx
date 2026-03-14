@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
-import { Providers } from '@/components/providers'
+import { Providers } from '@/shared/components/providers'
 import { AppLayout } from '@/shell/layout/app-layout'
 
 export const metadata: Metadata = {

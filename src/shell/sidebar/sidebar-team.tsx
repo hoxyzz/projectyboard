@@ -9,8 +9,8 @@ import {
 	DropdownMenuItem,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
-import { cn } from '@/lib/utils'
+} from '@/shared/components/ui/dropdown-menu'
+import { cn } from '@/shared/lib/utils'
 
 import type { TeamConfig } from './types'
 

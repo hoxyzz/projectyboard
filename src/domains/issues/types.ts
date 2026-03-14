@@ -1,4 +1,4 @@
-import type { PaginatedResult } from '@/types'
+import type { PaginatedResult } from '@/shared/types'
 
 export type Priority = 'urgent' | 'high' | 'medium' | 'low' | 'none'
 export type IssueStatus = 'backlog' | 'todo' | 'in_progress' | 'done' | 'cancelled'
