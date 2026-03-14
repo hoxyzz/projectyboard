@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { useRef, useState } from 'react'
 
-import type { ActivityEvent, Issue, IssueStatus, Priority } from '@/services'
+import type { ActivityEvent, Issue, IssueStatus, Priority } from '@/domains/issues/types'
 
 import { MarkdownEditor, MarkdownPreview } from '@/components/markdown-editor'
 import {
@@ -28,8 +28,8 @@ import {
 	PriorityIcon,
 	STATUS_OPTIONS,
 	StatusIcon
-} from '@/features/issues/issue-detail-panel'
-import { useIssue, useUpdateIssue } from '@/hooks/use-issues'
+} from '@/domains/issues/issue-detail-panel'
+import { useIssue, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
 import { useRouteShortcuts } from '@/hooks/use-route-shortcuts'
 import { useNavigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'

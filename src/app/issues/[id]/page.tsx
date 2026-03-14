@@ -1,8 +1,7 @@
 import { notFound } from 'next/navigation'
 
-import type { Issue } from '@/services'
-
-import { getIssueService } from '@/services'
+import { getIssueData } from '@/domains/issues/data'
+import type { Issue } from '@/domains/issues/types'
 import { IssueDetailView } from '@/views/issue-detail-view'
 
 type PageProps = {
@@ -11,7 +10,7 @@ type PageProps = {
 
 export default async function IssueDetailPage({ params }: PageProps) {
 	const { id } = await params
-	const issue = await getIssueService().getById(id)
+	const issue = await getIssueData().getById(id)
 
 	if (!issue) {
 		notFound()

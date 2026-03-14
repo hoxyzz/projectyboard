@@ -1,40 +1,19 @@
-/**
- * Service registry.
- *
- * This is the single place where service implementations are resolved.
- * To swap from mock → real backend:
- *   1. Create a new implementation (e.g. src/services/api/issues.ts)
- *   2. Change the factory call here
- *
- * Components never import from ./mock directly — they go through
- * hooks that call these getters.
- */
-
 import type {
-	IssueService,
 	NotificationService,
 	ProjectService,
 	TeamService,
 	UserService
 } from './types'
 
-import { createMockIssueService } from './mock/issues'
 import { createMockNotificationService } from './mock/notifications'
 import { createMockProjectService } from './mock/projects'
 import { createMockTeamService } from './mock/teams'
 import { createMockUserService } from './mock/user'
 
-// Singleton instances — one per service
-let issueService: IssueService | null = null
 let notificationService: NotificationService | null = null
 let userService: UserService | null = null
 let teamService: TeamService | null = null
 let projectService: ProjectService | null = null
-
-export function getIssueService(): IssueService {
-	if (!issueService) issueService = createMockIssueService()
-	return issueService
-}
 
 export function getNotificationService(): NotificationService {
 	if (!notificationService) notificationService = createMockNotificationService()
@@ -56,9 +35,7 @@ export function getProjectService(): ProjectService {
 	return projectService
 }
 
-/** Reset all services — useful for testing */
 export function resetServices() {
-	issueService = null
 	notificationService = null
 	userService = null
 	teamService = null
@@ -67,21 +44,12 @@ export function resetServices() {
 
 // Re-export types for convenience
 export type {
-	IssueService,
 	NotificationService,
 	UserService,
 	TeamService,
 	ProjectService,
-	Issue,
-	IssueFilters,
-	IssueStatus,
-	Priority,
-	IssueLabel,
 	Project,
 	Team,
 	User,
-	Notification,
-	CreateIssueInput,
-	UpdateIssueInput,
-	ActivityEvent
+	Notification
 } from './types'

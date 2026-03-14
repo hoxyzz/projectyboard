@@ -12,7 +12,7 @@ import {
 	CommandList,
 	CommandSeparator
 } from '@/components/ui/command'
-import { useIssues } from '@/hooks/use-issues'
+import { useIssues } from '@/domains/issues/hooks/use-issues'
 import { useNavigate } from '@/lib/navigation'
 
 type SearchCommandProps = {
