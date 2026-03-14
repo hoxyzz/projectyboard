@@ -18,15 +18,14 @@ import { cn } from "@/lib/utils";
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from "date-fns";
 import { Kbd } from "@/components/kbd";
 import { useCounterStore } from "@/stores/counter-store";
-import { useListSelection } from "@/hooks/use-list-selection";
+import { useListSelection, type SectionGroup } from "@/hooks/use-list-selection";
 import { BulkActionDialog, type BulkActionType } from "@/components/bulk-action-dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Notification } from "@/services/types";
 
 // ─── Helpers ────────────────────────────────────────────
 
-function groupByDate(items: Notification[]) {
-  const groups: { label: string; items: Notification[] }[] = [];
+function groupByDate(items: Notification[]): SectionGroup<Notification>[] {
   const buckets: Record<string, Notification[]> = {};
 
   for (const n of items) {
@@ -41,9 +40,14 @@ function groupByDate(items: Notification[]) {
   }
 
   const order = ["Today", "Yesterday", "This week", "Earlier"];
+  const groups: SectionGroup<Notification>[] = [];
+  
   for (const label of order) {
-    if (buckets[label]?.length) groups.push({ label, items: buckets[label] });
+    if (buckets[label]?.length) {
+      groups.push({ id: label.toLowerCase().replace(/\s/g, "-"), label, items: buckets[label] });
+    }
   }
+  
   return groups;
 }
 
@@ -51,35 +55,35 @@ function groupByDate(items: Notification[]) {
 
 function NotificationRow({
   n,
-  index,
   isFocused,
   isSelected,
   showCheckbox,
   onToggleSelect,
+  onToggleRead,
   onMarkRead,
 }: {
   n: Notification;
-  index: number;
   isFocused: boolean;
   isSelected: boolean;
   showCheckbox: boolean;
-  onToggleSelect: (index: number) => void;
-  onMarkRead: (id: string) => void;
+  onToggleSelect: () => void;
+  onToggleRead: () => void;
+  onMarkRead: () => void;
 }) {
   return (
     <div
       className={cn(
         "flex items-center h-[42px] px-4 border-b border-li-divider transition-colors cursor-pointer group",
         !n.read && "bg-li-bg-hover/50",
-        isFocused && "ring-1 ring-inset ring-li-dot-blue",
+        isFocused && "ring-1 ring-inset ring-li-dot-blue bg-li-bg-hover/30",
         isSelected && "bg-li-dot-blue/10",
         !isSelected && !isFocused && "hover:bg-li-bg-hover"
       )}
       onClick={(e) => {
         if (e.shiftKey || showCheckbox) {
-          onToggleSelect(index);
+          onToggleSelect();
         } else if (!n.read) {
-          onMarkRead(n.id);
+          onMarkRead();
         }
       }}
       tabIndex={-1}
@@ -91,7 +95,7 @@ function NotificationRow({
         {showCheckbox ? (
           <Checkbox
             checked={isSelected}
-            onCheckedChange={() => onToggleSelect(index)}
+            onCheckedChange={onToggleSelect}
             onClick={(e) => e.stopPropagation()}
             className="h-3.5 w-3.5 border-li-border data-[state=checked]:bg-li-dot-blue data-[state=checked]:border-li-dot-blue"
             aria-label={`Select notification: ${n.title}`}
@@ -131,7 +135,7 @@ function NotificationRow({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onMarkRead(n.id);
+              onMarkRead();
             }}
             className="opacity-0 group-hover:opacity-100 transition-opacity text-li-text-muted hover:text-li-text-bright"
             title="Mark as read"
@@ -145,67 +149,69 @@ function NotificationRow({
   );
 }
 
-// ─── Collapsible group ─────────────────────────────────
+// ─── Section header ────────────────────────────────────
 
-function NotificationGroup({
+function SectionHeader({
   label,
-  items,
-  itemIndexOffset,
-  focusedIndex,
-  selection,
-  showCheckboxes,
-  onToggleSelect,
-  onMarkRead,
+  count,
+  isOpen,
+  isFocused,
+  isFullySelected,
+  showCheckbox,
+  onToggle,
+  onSelectAll,
 }: {
   label: string;
-  items: Notification[];
-  itemIndexOffset: number;
-  focusedIndex: number;
-  selection: UseListSelectionReturn;
-  showCheckboxes: boolean;
-  onToggleSelect: (index: number) => void;
-  onMarkRead: (id: string) => void;
+  count: number;
+  isOpen: boolean;
+  isFocused: boolean;
+  isFullySelected: boolean;
+  showCheckbox: boolean;
+  onToggle: () => void;
+  onSelectAll: () => void;
 }) {
-  const [open, setOpen] = useState(true);
-
   return (
-    <div role="rowgroup" aria-label={label}>
+    <div
+      className={cn(
+        "flex items-center gap-1.5 w-full px-4 py-1.5 transition-colors",
+        isFocused && "ring-1 ring-inset ring-li-dot-blue bg-li-bg-hover/30"
+      )}
+      role="row"
+      tabIndex={-1}
+    >
+      {showCheckbox && (
+        <Checkbox
+          checked={isFullySelected}
+          onCheckedChange={onSelectAll}
+          onClick={(e) => e.stopPropagation()}
+          className="h-3.5 w-3.5 mr-1 border-li-border data-[state=checked]:bg-li-dot-blue data-[state=checked]:border-li-dot-blue"
+          aria-label={`Select all in ${label}`}
+        />
+      )}
       <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 w-full px-4 py-1.5 text-[11px] font-medium text-li-text-muted uppercase tracking-wider hover:text-li-text-bright transition-colors"
-        aria-expanded={open}
+        onClick={onToggle}
+        className="flex items-center gap-1.5 text-[11px] font-medium text-li-text-muted uppercase tracking-wider hover:text-li-text-bright transition-colors"
+        aria-expanded={isOpen}
       >
         <ChevronRight
           className={cn(
             "h-3 w-3 transition-transform duration-150",
-            open && "rotate-90"
+            isOpen && "rotate-90"
           )}
         />
         {label}
-        <span className="text-li-text-badge ml-1">{items.length}</span>
+        <span className="text-li-text-badge ml-1">{count}</span>
       </button>
-      {open &&
-        items.map((n, localIdx) => {
-          const globalIdx = itemIndexOffset + localIdx;
-          return (
-            <NotificationRow
-              key={n.id}
-              n={n}
-              index={globalIdx}
-              isFocused={selection.isFocused(globalIdx)}
-              isSelected={selection.isSelected(n.id)}
-              showCheckbox={showCheckboxes}
-              onToggleSelect={onToggleSelect}
-              onMarkRead={onMarkRead}
-            />
-          );
-        })}
+      {isFocused && (
+        <span className="ml-auto flex items-center gap-1 text-[10px] text-li-text-muted">
+          <Kbd keys={["R"]} /> read
+          <Kbd keys={["U"]} /> unread
+          <Kbd keys={["⌫"]} /> delete
+        </span>
+      )}
     </div>
   );
 }
-
-// Type for selection return
-type UseListSelectionReturn = ReturnType<typeof useListSelection<Notification>>;
 
 // ─── Page ──────────────────────────────────────────────
 
@@ -213,6 +219,7 @@ export function InboxView() {
   const { data: notifications = [], isLoading } = useNotifications();
   const qc = useQueryClient();
   const [filter, setFilter] = useState<"all" | "unread">("all");
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const listRef = useRef<HTMLDivElement>(null);
   const setCount = useCounterStore((s) => s.setCount);
 
@@ -226,19 +233,32 @@ export function InboxView() {
     [filter, notifications]
   );
 
+  const groups = useMemo(() => groupByDate(filtered), [filtered]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   useEffect(() => {
     setCount("inbox", unreadCount);
   }, [unreadCount, setCount]);
 
-  // Multi-selection hook
+  // Multi-selection hook with hierarchical navigation
   const selection = useListSelection({
-    items: filtered,
+    groups,
     getItemId: (n) => n.id,
   });
 
   const showCheckboxes = selection.hasSelection;
+
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
+      } else {
+        next.add(sectionId);
+      }
+      return next;
+    });
+  };
 
   // ─── Actions ──────────────────────────────────────────
 
@@ -248,11 +268,24 @@ export function InboxView() {
     qc.invalidateQueries({ queryKey: ["notifications"] });
   };
 
-  const handleBulkMarkRead = async () => {
+  const markAsUnread = async (id: string) => {
+    const svc = getNotificationService();
+    await svc.markAsUnread?.(id);
+    qc.invalidateQueries({ queryKey: ["notifications"] });
+  };
+
+  const toggleRead = async (id: string, currentlyRead: boolean) => {
+    if (currentlyRead) {
+      await markAsUnread(id);
+    } else {
+      await markAsRead(id);
+    }
+  };
+
+  const handleBulkMarkRead = async (ids: string[]) => {
     setIsProcessing(true);
     try {
       const svc = getNotificationService();
-      const ids = Array.from(selection.selectedIds);
       await svc.markManyAsRead?.(ids);
       qc.invalidateQueries({ queryKey: ["notifications"] });
       selection.clearSelection();
@@ -262,11 +295,10 @@ export function InboxView() {
     }
   };
 
-  const handleBulkMarkUnread = async () => {
+  const handleBulkMarkUnread = async (ids: string[]) => {
     setIsProcessing(true);
     try {
       const svc = getNotificationService();
-      const ids = Array.from(selection.selectedIds);
       await svc.markManyAsUnread?.(ids);
       qc.invalidateQueries({ queryKey: ["notifications"] });
       selection.clearSelection();
@@ -276,11 +308,10 @@ export function InboxView() {
     }
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = async (ids: string[]) => {
     setIsProcessing(true);
     try {
       const svc = getNotificationService();
-      const ids = Array.from(selection.selectedIds);
       await svc.deleteMany?.(ids);
       qc.invalidateQueries({ queryKey: ["notifications"] });
       selection.clearSelection();
@@ -296,64 +327,121 @@ export function InboxView() {
     qc.invalidateQueries({ queryKey: ["notifications"] });
   };
 
+  // Get the IDs that the action should apply to
+  const getActionTargetIds = useCallback((): string[] => {
+    const { focusTarget, selectedIds, hasSelection } = selection;
+    
+    // If items are selected, use selection
+    if (hasSelection) {
+      return Array.from(selectedIds);
+    }
+    
+    // If focused on a section, use all items in that section
+    if (focusTarget.type === "section") {
+      return selection.getSectionItemIds(focusTarget.sectionIndex);
+    }
+    
+    // If focused on an item, use just that item
+    const focusedItem = selection.getFocusedItem();
+    return focusedItem ? [focusedItem.id] : [];
+  }, [selection]);
+
   const openBulkDialog = (action: BulkActionType) => {
-    if (!selection.hasSelection) return;
+    const ids = getActionTargetIds();
+    if (ids.length === 0) return;
     setDialogAction(action);
     setDialogOpen(true);
   };
 
   const handleConfirm = () => {
+    const ids = getActionTargetIds();
     switch (dialogAction) {
       case "delete":
-        handleBulkDelete();
+        handleBulkDelete(ids);
         break;
       case "markRead":
-        handleBulkMarkRead();
+        handleBulkMarkRead(ids);
         break;
       case "markUnread":
-        handleBulkMarkUnread();
+        handleBulkMarkUnread(ids);
         break;
     }
   };
+
+  // Handle action on single focused item (no dialog)
+  const handleFocusedItemAction = useCallback(
+    async (action: "read" | "unread" | "toggle") => {
+      const { focusTarget, hasSelection } = selection;
+      
+      // If selection exists, open dialog instead
+      if (hasSelection) {
+        openBulkDialog(action === "toggle" ? "markRead" : action === "read" ? "markRead" : "markUnread");
+        return;
+      }
+      
+      // If focused on section, apply to all items in section (with dialog)
+      if (focusTarget.type === "section") {
+        openBulkDialog(action === "toggle" ? "markRead" : action === "read" ? "markRead" : "markUnread");
+        return;
+      }
+      
+      // Single item - apply immediately without dialog
+      const focusedItem = selection.getFocusedItem();
+      if (!focusedItem) return;
+      
+      if (action === "toggle") {
+        await toggleRead(focusedItem.id, focusedItem.read);
+      } else if (action === "read") {
+        await markAsRead(focusedItem.id);
+      } else {
+        await markAsUnread(focusedItem.id);
+      }
+    },
+    [selection]
+  );
 
   // ─── Keyboard handlers ────────────────────────────────
 
   const handleListKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      // Let selection hook handle arrow keys and space
+      // Let selection hook handle arrow keys, space, escape
       selection.handleKeyDown(e);
 
       const key = e.key.toLowerCase();
 
-      // Shift+A = Select all
+      // Shift+A = Hierarchical select (section first, then all)
       if (e.shiftKey && key === "a") {
         e.preventDefault();
-        selection.selectAll();
+        selection.hierarchicalSelect();
         return;
       }
 
-      // Only handle bulk actions when items are selected
-      if (selection.hasSelection) {
-        // R = Mark selected as read
-        if (key === "r" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-          e.preventDefault();
-          openBulkDialog("markRead");
-          return;
-        }
+      // R = Mark as read (focused item, section, or selection)
+      if (key === "r" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleFocusedItemAction("read");
+        return;
+      }
 
-        // U = Mark selected as unread
-        if (key === "u" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-          e.preventDefault();
-          openBulkDialog("markUnread");
-          return;
-        }
+      // U = Mark as unread (focused item, section, or selection)
+      if (key === "u" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        handleFocusedItemAction("unread");
+        return;
+      }
 
-        // Backspace = Delete selected
-        if (key === "backspace" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
-          e.preventDefault();
-          openBulkDialog("delete");
-          return;
-        }
+      // Space = Toggle read/unread (when not handled by selection hook for toggle)
+      // Note: Space in selection hook toggles selection, but when nothing selected, toggle read state
+      if (key === " " && !selection.hasSelection && selection.focusTarget.type === "item") {
+        // Already handled by selection hook for toggling selection
+        // But we want to also toggle read state - this is handled in the hook
+      }
+
+      // Backspace = Delete (focused item, section, or selection)
+      if (key === "backspace" && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
+        e.preventDefault();
+        openBulkDialog("delete");
+        return;
       }
 
       // Filter shortcuts
@@ -363,20 +451,35 @@ export function InboxView() {
         setFilter("unread");
       }
     },
-    [selection]
+    [selection, handleFocusedItemAction]
   );
 
-  // Calculate item index offset for each group
-  const groups = useMemo(() => groupByDate(filtered), [filtered]);
-  const groupOffsets = useMemo(() => {
-    const offsets: number[] = [];
-    let offset = 0;
-    for (const group of groups) {
-      offsets.push(offset);
-      offset += group.items.length;
+  // Handle toggle of section selection
+  const handleSectionSelectAll = (sectionIndex: number) => {
+    const sectionIds = selection.getSectionItemIds(sectionIndex);
+    const isFullySelected = selection.isSectionFullySelected(sectionIndex);
+    
+    if (isFullySelected) {
+      // Deselect all in section
+      const newSelection = new Set(selection.selectedIds);
+      sectionIds.forEach((id) => newSelection.delete(id));
+      // We need to call internal method - for now, toggle each item
+      sectionIds.forEach((_, itemIndex) => {
+        if (selection.isSelected(sectionIds[itemIndex])) {
+          selection.toggleItem(sectionIndex, itemIndex);
+        }
+      });
+    } else {
+      // Select all in section
+      sectionIds.forEach((_, itemIndex) => {
+        if (!selection.isSelected(sectionIds[itemIndex])) {
+          selection.toggleItem(sectionIndex, itemIndex);
+        }
+      });
     }
-    return offsets;
-  }, [groups]);
+  };
+
+  const actionTargetCount = getActionTargetIds().length;
 
   return (
     <div className="flex-1 flex flex-col bg-li-content-bg min-h-0">
@@ -486,7 +589,7 @@ export function InboxView() {
           <Kbd keys={["Space"]} /> toggle select
         </span>
         <span className="flex items-center gap-1">
-          <Kbd keys={["⇧", "A"]} /> select all
+          <Kbd keys={["⇧", "A"]} /> select section/all
         </span>
       </div>
 
@@ -512,19 +615,39 @@ export function InboxView() {
             </p>
           </div>
         ) : (
-          groups.map((group, groupIdx) => (
-            <NotificationGroup
-              key={group.label}
-              label={group.label}
-              items={group.items}
-              itemIndexOffset={groupOffsets[groupIdx]}
-              focusedIndex={selection.focusedIndex}
-              selection={selection}
-              showCheckboxes={showCheckboxes}
-              onToggleSelect={selection.toggleItem}
-              onMarkRead={markAsRead}
-            />
-          ))
+          groups.map((group, sectionIndex) => {
+            const isCollapsed = collapsedSections.has(group.id);
+            const isSectionFocused = selection.isSectionFocused(sectionIndex);
+            const isFullySelected = selection.isSectionFullySelected(sectionIndex);
+            
+            return (
+              <div key={group.id} role="rowgroup" aria-label={group.label}>
+                <SectionHeader
+                  label={group.label}
+                  count={group.items.length}
+                  isOpen={!isCollapsed}
+                  isFocused={isSectionFocused}
+                  isFullySelected={isFullySelected}
+                  showCheckbox={showCheckboxes}
+                  onToggle={() => toggleSection(group.id)}
+                  onSelectAll={() => handleSectionSelectAll(sectionIndex)}
+                />
+                {!isCollapsed &&
+                  group.items.map((n, itemIndex) => (
+                    <NotificationRow
+                      key={n.id}
+                      n={n}
+                      isFocused={selection.isItemFocused(sectionIndex, itemIndex)}
+                      isSelected={selection.isSelected(n.id)}
+                      showCheckbox={showCheckboxes}
+                      onToggleSelect={() => selection.toggleItem(sectionIndex, itemIndex)}
+                      onToggleRead={() => toggleRead(n.id, n.read)}
+                      onMarkRead={() => markAsRead(n.id)}
+                    />
+                  ))}
+              </div>
+            );
+          })
         )}
       </div>
 
@@ -533,7 +656,7 @@ export function InboxView() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         actionType={dialogAction}
-        itemCount={selection.selectionCount}
+        itemCount={actionTargetCount}
         onConfirm={handleConfirm}
         isLoading={isProcessing}
       />
