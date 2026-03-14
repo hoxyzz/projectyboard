@@ -60,12 +60,12 @@ export function createMockNotificationService(): NotificationService {
 			})
 		},
 
-		async delete(id: string) {
+		async destroy(id: string) {
 			const index = notifications.findIndex((n) => n.id === id)
 			if (index !== -1) notifications.splice(index, 1)
 		},
 
-		async deleteMany(ids: string[]) {
+		async destroyMany(ids: string[]) {
 			const idSet = new Set(ids)
 			for (let i = notifications.length - 1; i >= 0; i--) {
 				if (idSet.has(notifications[i].id)) {

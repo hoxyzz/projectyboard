@@ -241,7 +241,7 @@ export function InboxView() {
 
 	// Bulk action dialog state
 	const [dialogOpen, setDialogOpen] = useState(false)
-	const [dialogAction, setDialogAction] = useState<BulkActionType>('delete')
+	const [dialogAction, setDialogAction] = useState<BulkActionType>('destroy')
 	const [isProcessing, setIsProcessing] = useState(false)
 
 	const filtered = useMemo(
@@ -324,11 +324,11 @@ export function InboxView() {
 		}
 	}
 
-	const handleBulkDelete = async (ids: string[]) => {
+	const handleBulkDestroy = async (ids: string[]) => {
 		setIsProcessing(true)
 		try {
 			const svc = getNotificationService()
-			await svc.deleteMany?.(ids)
+			await svc.destroyMany?.(ids)
 			qc.invalidateQueries({ queryKey: ['notifications'] })
 			selection.clearSelection()
 		} finally {
@@ -372,8 +372,8 @@ export function InboxView() {
 	const handleConfirm = () => {
 		const ids = getActionTargetIds()
 		switch (dialogAction) {
-			case 'delete':
-				handleBulkDelete(ids)
+			case 'destroy':
+				handleBulkDestroy(ids)
 				break
 			case 'markRead':
 				handleBulkMarkRead(ids)
@@ -459,7 +459,7 @@ export function InboxView() {
 			// Backspace = Delete (focused item, section, or selection)
 			if (key === 'backspace' && !e.shiftKey && !e.metaKey && !e.ctrlKey) {
 				e.preventDefault()
-				openBulkDialog('delete')
+				openBulkDialog('destroy')
 				return
 			}
 
@@ -576,7 +576,7 @@ export function InboxView() {
 							<Kbd keys={['U']} />
 						</button>
 						<button
-							onClick={() => openBulkDialog('delete')}
+							onClick={() => openBulkDialog('destroy')}
 							className="flex items-center gap-1.5 text-[12px] text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
 							title="Delete selected (Backspace)"
 						>

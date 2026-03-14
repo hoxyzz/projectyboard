@@ -39,10 +39,10 @@ export function useUpdateIssue() {
 	})
 }
 
-export function useDeleteIssue() {
+export function useDestroyIssue() {
 	const qc = useQueryClient()
 	return useMutation({
-		mutationFn: (id: string) => getIssueService().delete(id),
+		mutationFn: (id: string) => getIssueService().destroy(id),
 		onSuccess: () => qc.invalidateQueries({ queryKey: [ISSUES_KEY] })
 	})
 }

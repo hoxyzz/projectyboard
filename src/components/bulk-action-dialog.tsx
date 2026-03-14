@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 
-export type BulkActionType = 'delete' | 'markRead' | 'markUnread'
+export type BulkActionType = 'destroy' | 'markRead' | 'markUnread'
 
 type BulkActionDialogProps = {
 	open: boolean
@@ -34,7 +34,7 @@ const ACTION_CONFIG: Record<
 		variant: 'default' | 'destructive'
 	}
 > = {
-	delete: {
+	destroy: {
 		title: 'Delete items',
 		description: (count) =>
 			`Are you sure you want to delete ${count} item${count === 1 ? '' : 's'}? This action cannot be undone.`,

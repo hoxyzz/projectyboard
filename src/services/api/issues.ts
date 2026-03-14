@@ -94,11 +94,11 @@ export function createApiIssueService(config: ApiIssueServiceConfig): IssueServi
 			return handleResponse<Issue>(res)
 		},
 
-		async delete(id: string): Promise<void> {
-			const res = await fetch(`${baseUrl}/issues/${id}`, {
-				method: 'DELETE',
-				headers: buildHeaders(config)
-			})
+	async destroy(id: string): Promise<void> {
+		const res = await fetch(`${baseUrl}/issues/${id}`, {
+			method: 'DELETE',
+			headers: buildHeaders(config)
+		})
 			if (!res.ok) {
 				const body = await res.text().catch(() => '')
 				throw new Error(`API error ${res.status}: ${body}`)

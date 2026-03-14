@@ -308,7 +308,7 @@ export function createMockIssueService(): IssueService {
 			return issues[idx]
 		},
 
-		async delete(id: string) {
+		async destroy(id: string) {
 			issues = issues.filter((i) => i.id !== id)
 		}
 	}

@@ -67,7 +67,7 @@ export type IssueService = {
 	getById(id: string): Promise<Issue | null>
 	create(input: CreateIssueInput): Promise<Issue>
 	update(id: string, input: UpdateIssueInput): Promise<Issue>
-	delete(id: string): Promise<void>
+	destroy(id: string): Promise<void>
 }
 
 export type CreateIssueInput = {
@@ -148,7 +148,7 @@ export type NotificationService = {
 	markAllAsRead?: () => Promise<void>
 	markManyAsRead?: (ids: string[]) => Promise<void>
 	markManyAsUnread?: (ids: string[]) => Promise<void>
-	delete?: (id: string) => Promise<void>
-	deleteMany?: (ids: string[]) => Promise<void>
+	destroy?: (id: string) => Promise<void>
+	destroyMany?: (ids: string[]) => Promise<void>
 	getUnreadCount(): Promise<number>
 }
