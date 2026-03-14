@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from 'next'
 
 import './globals.css'
-import { AppLayout } from '@/layouts/AppLayout'
 import { Providers } from '@/components/providers'
+import { AppLayout } from '@/shell/layout/app-layout'
 
 export const metadata: Metadata = {
 	title: 'Orbit Dock',
