@@ -112,6 +112,12 @@
 			}
 		},
 		{
+			"files": ["**/error.tsx", "**/error.ts", "**/global-error.tsx", "**/not-found.tsx"],
+			"rules": {
+				"import/no-default-export": "off"
+			}
+		},
+		{
 			"files": ["**/*view*/**/*.{ts,tsx}", "**/*view*.{ts,tsx}"],
 			"rules": {
 				"import/no-default-export": "off"

@@ -18,7 +18,7 @@ import {
 	UserPlus
 } from 'lucide-react'
 
-import type { SidebarConfig } from '@/features/sidebar'
+import type { SidebarConfig } from './types'
 
 export const demoSidebarConfig: SidebarConfig = {
 	user: {

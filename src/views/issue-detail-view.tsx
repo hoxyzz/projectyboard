@@ -1,3 +1,5 @@
+'use client'
+
 import { format, formatDistanceToNow } from 'date-fns'
 import {
 	AlertCircle,
@@ -29,7 +31,7 @@ import {
 } from '@/features/issues/issue-detail-panel'
 import { useIssue, useUpdateIssue } from '@/hooks/use-issues'
 import { useRouteShortcuts } from '@/hooks/use-route-shortcuts'
-import { useNavigate, useParams } from '@/lib/navigation'
+import { useNavigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
 
 // ─── Activity Item (full version) ───────────────────────
@@ -113,15 +115,16 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
 	)
 }
 
-// ─── Full Issue Detail Page ─────────────────────────────
+type IssueDetailViewProps = {
+	issue: Issue
+}
 
-export function IssueDetailView() {
-	const { id } = useParams<{ id: string }>()
+export function IssueDetailView({ issue: initialIssue }: IssueDetailViewProps) {
+	const issueId = initialIssue.id
 	const navigate = useNavigate()
-	const { data: issue, isLoading } = useIssue(id ?? '')
+	const { data: issue, isLoading } = useIssue(issueId, initialIssue)
 	const updateIssue = useUpdateIssue()
 	const editorRef = useRef<HTMLTextAreaElement | null>(null)
-
 	const [editingTitle, setEditingTitle] = useState(false)
 	const [titleValue, setTitleValue] = useState('')
 	const [editingDesc, setEditingDesc] = useState(false)

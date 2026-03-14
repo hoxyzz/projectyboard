@@ -5,14 +5,14 @@ import { ReactNode, useMemo, useState } from 'react'
 
 import { SearchCommand } from '@/components/search-command'
 import { ShortcutCheatsheet } from '@/components/shortcut-cheatsheet'
-import { SidebarRoot } from '@/features/sidebar'
 import { buildSidebarConfig } from '@/features/sidebar/build-config'
+import { SidebarRoot } from '@/features/sidebar/sidebar-root'
 import { useTeams } from '@/hooks/use-teams'
 import { useCurrentUser } from '@/hooks/use-user'
 import { useNavigate } from '@/lib/navigation'
 import { useCounterStore } from '@/stores/counter-store'
 
-export default function AppLayout({ children }: { children?: ReactNode }) {
+export function AppLayout({ children }: { children?: ReactNode }) {
 	const navigate = useNavigate()
 	const { data: user } = useCurrentUser()
 	const { data: teams } = useTeams()

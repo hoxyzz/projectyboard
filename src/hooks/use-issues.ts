@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-import type { CreateIssueInput, IssueFilters, UpdateIssueInput } from '@/services'
+import type { CreateIssueInput, Issue, IssueFilters, UpdateIssueInput } from '@/services'
 
 import { getIssueService } from '@/services'
 
@@ -13,11 +13,12 @@ export function useIssues(filters?: IssueFilters) {
 	})
 }
 
-export function useIssue(id: string) {
+export function useIssue(id: string, initialData?: Issue) {
 	return useQuery({
 		queryKey: [ISSUES_KEY, id],
 		queryFn: () => getIssueService().getById(id),
-		enabled: !!id
+		enabled: !!id,
+		initialData
 	})
 }
 

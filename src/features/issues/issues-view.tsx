@@ -312,7 +312,7 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 	const updateIssue = useUpdateIssue()
 
 	// Push "in_progress" issue count to sidebar counter store
-	const allIssues = data?.data ?? []
+	const allIssues = useMemo(() => data?.data ?? [], [data?.data])
 	const trackedCount = useMemo(
 		() => allIssues.filter((i) => TRACKED_STATUSES.includes(i.status)).length,
 		[allIssues]

@@ -22,8 +22,8 @@ import {
 	Settings
 } from 'lucide-react'
 
-import type { SidebarConfig } from '@/features/sidebar'
 import type { OptionalAction } from '@/types'
+import type { SidebarConfig } from './types'
 
 export interface SidebarConfigParams {
 	userName: string

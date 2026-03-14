@@ -208,7 +208,7 @@ export function IssueDetailPanel({
 			}, 300)
 			return () => clearTimeout(timer)
 		}
-	}, [expanded])
+	}, [expanded, shouldRender])
 
 	// After expand animation completes
 	const handleTransitionEnd = useCallback(() => {

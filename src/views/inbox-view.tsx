@@ -278,25 +278,25 @@ export function InboxView() {
 
 	// ─── Actions ──────────────────────────────────────────
 
-	const markAsRead = async (id: string) => {
+	const markAsRead = useCallback(async (id: string) => {
 		const svc = getNotificationService()
 		await svc.markAsRead?.(id)
 		qc.invalidateQueries({ queryKey: ['notifications'] })
-	}
+	}, [qc])
 
-	const markAsUnread = async (id: string) => {
+	const markAsUnread = useCallback(async (id: string) => {
 		const svc = getNotificationService()
 		await svc.markAsUnread?.(id)
 		qc.invalidateQueries({ queryKey: ['notifications'] })
-	}
+	}, [qc])
 
-	const toggleRead = async (id: string, currentlyRead: boolean) => {
+	const toggleRead = useCallback(async (id: string, currentlyRead: boolean) => {
 		if (currentlyRead) {
 			await markAsUnread(id)
 		} else {
 			await markAsRead(id)
 		}
-	}
+	}, [markAsRead, markAsUnread])
 
 	const handleBulkMarkRead = async (ids: string[]) => {
 		setIsProcessing(true)
@@ -337,11 +337,11 @@ export function InboxView() {
 		}
 	}
 
-	const markAllAsRead = async () => {
+	const markAllAsRead = useCallback(async () => {
 		const svc = getNotificationService()
 		await svc.markAllAsRead?.()
 		qc.invalidateQueries({ queryKey: ['notifications'] })
-	}
+	}, [qc])
 
 	// Get the IDs that the action should apply to
 	const getActionTargetIds = useCallback((): string[] => {
@@ -362,12 +362,12 @@ export function InboxView() {
 		return focusedItem ? [focusedItem.id] : []
 	}, [selection])
 
-	const openBulkDialog = (action: BulkActionType) => {
+	const openBulkDialog = useCallback((action: BulkActionType) => {
 		const ids = getActionTargetIds()
 		if (ids.length === 0) return
 		setDialogAction(action)
 		setDialogOpen(true)
-	}
+	}, [getActionTargetIds])
 
 	const handleConfirm = () => {
 		const ids = getActionTargetIds()
@@ -416,7 +416,7 @@ export function InboxView() {
 				await markAsUnread(focusedItem.id)
 			}
 		},
-		[selection]
+		[selection, openBulkDialog, toggleRead, markAsRead, markAsUnread]
 	)
 
 	// ─── Keyboard handlers ────────────────────────────────
@@ -470,7 +470,7 @@ export function InboxView() {
 				setFilter('unread')
 			}
 		},
-		[selection, handleFocusedItemAction]
+		[selection, handleFocusedItemAction, openBulkDialog]
 	)
 
 	// Handle toggle of section selection
