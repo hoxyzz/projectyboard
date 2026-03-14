@@ -1,14 +1,14 @@
-'use client';
+'use client'
 
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 
 export default function RootPage() {
-  const router = useRouter();
+	const router = useRouter()
 
-  useEffect(() => {
-    router.push('/inbox');
-  }, [router]);
+	useEffect(() => {
+		router.push('/inbox')
+	}, [router])
 
-  return null;
+	return null
 }

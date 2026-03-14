@@ -83,31 +83,37 @@
 
 ```typescript
 // Enums
-type Priority = "urgent" | "high" | "medium" | "low" | "none";
-type IssueStatus = "backlog" | "todo" | "in_progress" | "done" | "cancelled";
+type Priority = 'urgent' | 'high' | 'medium' | 'low' | 'none'
+type IssueStatus = 'backlog' | 'todo' | 'in_progress' | 'done' | 'cancelled'
 
 // Value Objects
 interface IssueLabel {
-  id: string;
-  name: string;
-  color: string;
+	id: string
+	name: string
+	color: string
 }
 
 interface SubIssueProgress {
-  done: number;
-  total: number;
+	done: number
+	total: number
 }
 
 interface ActivityEvent {
-  id: string;
-  type: "status_change" | "priority_change" | "label_added" | 
-        "label_removed" | "created" | "updated" | "description_changed";
-  field?: string;
-  from?: string;
-  to?: string;
-  userId: string;
-  userName: string;
-  createdAt: string;
+	id: string
+	type:
+		| 'status_change'
+		| 'priority_change'
+		| 'label_added'
+		| 'label_removed'
+		| 'created'
+		| 'updated'
+		| 'description_changed'
+	field?: string
+	from?: string
+	to?: string
+	userId: string
+	userName: string
+	createdAt: string
 }
 ```
 
@@ -152,39 +158,39 @@ interface ActivityEvent {
 ```typescript
 // Issue Service
 interface IssueService {
-  list(filters?: IssueFilters): Promise<PaginatedResult<Issue>>;
-  getById(id: string): Promise<Issue | null>;
-  create(input: CreateIssueInput): Promise<Issue>;
-  update(id: string, input: UpdateIssueInput): Promise<Issue>;
-  delete(id: string): Promise<void>;
+	list(filters?: IssueFilters): Promise<PaginatedResult<Issue>>
+	getById(id: string): Promise<Issue | null>
+	create(input: CreateIssueInput): Promise<Issue>
+	update(id: string, input: UpdateIssueInput): Promise<Issue>
+	delete(id: string): Promise<void>
 }
 
 // Project Service
 interface ProjectService {
-  list(): Promise<Project[]>;
-  getById(id: string): Promise<Project | null>;
+	list(): Promise<Project[]>
+	getById(id: string): Promise<Project | null>
 }
 
 // Team Service
 interface TeamService {
-  list(): Promise<Team[]>;
-  getById(id: string): Promise<Team | null>;
+	list(): Promise<Team[]>
+	getById(id: string): Promise<Team | null>
 }
 
 // User Service
 interface UserService {
-  getCurrentUser(): Promise<User | null>;
-  login?: (email: string, password: string) => Promise<User>;
-  logout?: () => Promise<void>;
+	getCurrentUser(): Promise<User | null>
+	login?: (email: string, password: string) => Promise<User>
+	logout?: () => Promise<void>
 }
 
 // Notification Service
 interface NotificationService {
-  list(): Promise<Notification[]>;
-  markAsRead?: (id: string) => Promise<void>;
-  markAsUnread?: (id: string) => Promise<void>;
-  markAllAsRead?: () => Promise<void>;
-  getUnreadCount(): Promise<number>;
+	list(): Promise<Notification[]>
+	markAsRead?: (id: string) => Promise<void>
+	markAsUnread?: (id: string) => Promise<void>
+	markAllAsRead?: () => Promise<void>
+	getUnreadCount(): Promise<number>
 }
 ```
 
@@ -198,14 +204,14 @@ To replace mock services with a real backend:
 ```typescript
 // Before (mock)
 export function getIssueService(): IssueService {
-  if (!issueService) issueService = createMockIssueService();
-  return issueService;
+	if (!issueService) issueService = createMockIssueService()
+	return issueService
 }
 
 // After (real API)
 export function getIssueService(): IssueService {
-  if (!issueService) issueService = createApiIssueService();
-  return issueService;
+	if (!issueService) issueService = createApiIssueService()
+	return issueService
 }
 ```
 
@@ -271,17 +277,17 @@ export function getIssueService(): IssueService {
 
 ### Data Flow Hooks
 
-| Hook | Query Key | Service | Returns |
-|------|-----------|---------|---------|
-| `useIssues(filters?)` | `["issues", filters]` | IssueService.list | PaginatedResult\<Issue\> |
-| `useIssue(id)` | `["issues", id]` | IssueService.getById | Issue \| null |
-| `useCreateIssue()` | mutation | IssueService.create | Issue |
-| `useUpdateIssue()` | mutation | IssueService.update | Issue |
-| `useDeleteIssue()` | mutation | IssueService.delete | void |
-| `useTeams()` | `["teams"]` | TeamService.list | Team[] |
-| `useCurrentUser()` | `["current-user"]` | UserService.getCurrentUser | User \| null |
-| `useNotifications()` | `["notifications"]` | NotificationService.list | Notification[] |
-| `useUnreadCount()` | `["notifications", "unread-count"]` | NotificationService.getUnreadCount | number |
+| Hook                  | Query Key                           | Service                            | Returns                  |
+| --------------------- | ----------------------------------- | ---------------------------------- | ------------------------ |
+| `useIssues(filters?)` | `["issues", filters]`               | IssueService.list                  | PaginatedResult\<Issue\> |
+| `useIssue(id)`        | `["issues", id]`                    | IssueService.getById               | Issue \| null            |
+| `useCreateIssue()`    | mutation                            | IssueService.create                | Issue                    |
+| `useUpdateIssue()`    | mutation                            | IssueService.update                | Issue                    |
+| `useDeleteIssue()`    | mutation                            | IssueService.delete                | void                     |
+| `useTeams()`          | `["teams"]`                         | TeamService.list                   | Team[]                   |
+| `useCurrentUser()`    | `["current-user"]`                  | UserService.getCurrentUser         | User \| null             |
+| `useNotifications()`  | `["notifications"]`                 | NotificationService.list           | Notification[]           |
+| `useUnreadCount()`    | `["notifications", "unread-count"]` | NotificationService.getUnreadCount | number                   |
 
 ---
 
@@ -413,6 +419,7 @@ When connecting to a real backend:
 5. **Cache Invalidation**: TanStack Query patterns already handle refetching
 
 Supported backend options (per service contract design):
+
 - REST/fetch
 - tRPC / oRPC
 - Supabase client

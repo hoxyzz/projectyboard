@@ -1,7 +1,7 @@
-'use client';
+'use client'
 
-import { ProjectsView } from '@/views/projects-view';
+import { ProjectsView } from '@/views/projects-view'
 
 export default function ProjectsPage() {
-  return <ProjectsView />;
+	return <ProjectsView />
 }

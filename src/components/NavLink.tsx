@@ -1,14 +1,11 @@
-import { NavLink as NavigationNavLink } from "@/lib/navigation";
-import { forwardRef, type ComponentProps } from "react";
+import { type ComponentProps, forwardRef } from 'react'
 
-type NavLinkProps = ComponentProps<typeof NavigationNavLink>;
+import { NavLink as NavigationNavLink } from '@/lib/navigation'
 
-const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
-  (props, ref) => {
-    return <NavigationNavLink ref={ref as never} {...props} />;
-  },
-);
+type NavLinkProps = ComponentProps<typeof NavigationNavLink>
 
-NavLink.displayName = "NavLink";
+const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>((props, ref) => <NavigationNavLink ref={ref as never} {...props} />)
 
-export { NavLink };
+NavLink.displayName = 'NavLink'
+
+export { NavLink }

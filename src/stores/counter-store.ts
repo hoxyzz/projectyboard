@@ -8,25 +8,25 @@
  * Backend-agnostic: hooks/adapters push counts here; the store doesn't
  * know where data comes from.
  */
-import { create } from "zustand";
+import { create } from 'zustand'
 
-export type CounterKey = "inbox" | "reviews" | "my-issues";
+export type CounterKey = 'inbox' | 'reviews' | 'my-issues'
 
 interface CounterState {
-  counts: Record<CounterKey, number>;
-  setCount: (key: CounterKey, count: number) => void;
-  getCount: (key: CounterKey) => number;
+	counts: Record<CounterKey, number>
+	setCount: (key: CounterKey, count: number) => void
+	getCount: (key: CounterKey) => number
 }
 
 export const useCounterStore = create<CounterState>()((set, get) => ({
-  counts: {
-    inbox: 0,
-    reviews: 0,
-    "my-issues": 0,
-  },
-  setCount: (key, count) =>
-    set((s) => ({
-      counts: { ...s.counts, [key]: count },
-    })),
-  getCount: (key) => get().counts[key] ?? 0,
-}));
+	counts: {
+		inbox: 0,
+		reviews: 0,
+		'my-issues': 0
+	},
+	setCount: (key, count) =>
+		set((s) => ({
+			counts: { ...s.counts, [key]: count }
+		})),
+	getCount: (key) => get().counts[key] ?? 0
+}))
