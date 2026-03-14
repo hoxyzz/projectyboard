@@ -13,9 +13,9 @@ import {
 	DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu'
 import { useIssues, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
-import { useRouteShortcuts } from '@/hooks/use-route-shortcuts'
 import { useNavigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
+import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
 import { useCounterStore } from '@/stores/counter-store'
 
 import { CreateIssueModal } from './create-issue-modal'

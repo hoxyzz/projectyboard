@@ -1,17 +1,3 @@
-/**
- * Shared route-level shortcut pattern using native keydown.
- *
- * Shortcut scheme:
- *   s            = toggle read on focused item
- *   Shift+A      = mark all read
- *   n / Shift+N  = new item
- *   o            = open selected
- *   e            = focus editor
- *   /            = focus primary input
- *   Alt+S        = save
- *   1            = filter: all
- *   2            = filter: unread
- */
 import { useEffect, useRef } from 'react'
 
 export type RouteActions = {

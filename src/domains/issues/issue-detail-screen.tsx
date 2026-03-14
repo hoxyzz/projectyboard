@@ -30,9 +30,9 @@ import {
 	StatusIcon
 } from '@/domains/issues/issue-detail-panel'
 import { useIssue, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
-import { useRouteShortcuts } from '@/hooks/use-route-shortcuts'
 import { useNavigate } from '@/lib/navigation'
 import { cn } from '@/lib/utils'
+import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
 
 // ─── Activity Item (full version) ───────────────────────
 
