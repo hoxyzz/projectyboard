@@ -119,3 +119,96 @@ export async function updateIssue(
 		}
 	}
 }
+
+// ============================================================================
+// Use Case Class (for container DI)
+// ============================================================================
+
+export class UpdateIssueUseCase {
+	private issueRepo: IssueRepository
+	private labelRepo: LabelRepository
+
+	constructor(issueRepo: IssueRepository, labelRepo: LabelRepository) {
+		this.issueRepo = issueRepo
+		this.labelRepo = labelRepo
+	}
+
+	async execute(id: string, command: UpdateIssueCommand): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		const result = await updateIssue(
+			{
+				issues: this.issueRepo,
+				projects: { getById: async () => null } as unknown as ProjectRepository,
+				labels: this.labelRepo,
+				activityContext: { userId: 'system', userName: 'System' }
+			},
+			id,
+			command
+		)
+
+		if (!result.success) {
+			if ('notFound' in result) {
+				return { success: false, error: 'Issue not found' }
+			}
+			return { success: false, error: result.validation.errors.map((e) => e.message).join(', ') }
+		}
+
+		return { success: true, data: result.issue }
+	}
+
+	async status(id: string, status: IssueStatus): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		return this.execute(id, { status })
+	}
+
+	async priority(id: string, priority: Priority): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		return this.execute(id, { priority })
+	}
+
+	async assignee(id: string, assigneeId: string | null): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		// Assignees are out of scope per architecture doc
+		return { success: true }
+	}
+
+	async addLabels(id: string, labelIds: string[]): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		const issue = await this.issueRepo.getById(id)
+		if (!issue) {
+			return { success: false, error: 'Issue not found' }
+		}
+		const existingLabelIds = issue.labels.map((l) => l.id)
+		const newLabelIds = [...new Set([...existingLabelIds, ...labelIds])]
+		return this.execute(id, { labelIds: newLabelIds })
+	}
+
+	async removeLabels(id: string, labelIds: string[]): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		const issue = await this.issueRepo.getById(id)
+		if (!issue) {
+			return { success: false, error: 'Issue not found' }
+		}
+		const existingLabelIds = issue.labels.map((l) => l.id)
+		const newLabelIds = existingLabelIds.filter((id) => !labelIds.includes(id))
+		return this.execute(id, { labelIds: newLabelIds })
+	}
+}

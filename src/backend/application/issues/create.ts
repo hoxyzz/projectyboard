@@ -104,3 +104,53 @@ export async function createIssue(
 		}
 	}
 }
+
+// ============================================================================
+// Use Case Class (for container DI)
+// ============================================================================
+
+export class CreateIssueUseCase {
+	private issueRepo: IssueRepository
+	private projectRepo: ProjectRepository
+	private labelRepo: LabelRepository
+	private identifierCounter = 1
+
+	constructor(
+		issueRepo: IssueRepository,
+		projectRepo: ProjectRepository,
+		labelRepo: LabelRepository
+	) {
+		this.issueRepo = issueRepo
+		this.projectRepo = projectRepo
+		this.labelRepo = labelRepo
+	}
+
+	async execute(command: CreateIssueCommand): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		const result = await createIssue(
+			{
+				issues: this.issueRepo,
+				projects: this.projectRepo,
+				labels: this.labelRepo,
+				getNextIdentifierCounter: async () => this.identifierCounter++,
+				activityContext: {
+					userId: 'system',
+					userName: 'System'
+				}
+			},
+			command
+		)
+
+		if (!result.success) {
+			return {
+				success: false,
+				error: result.validation.errors.map((e) => e.message).join(', ')
+			}
+		}
+
+		return { success: true, data: result.issue }
+	}
+}

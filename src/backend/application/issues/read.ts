@@ -38,3 +38,66 @@ export async function readIssueById(
 ): Promise<Issue | null> {
 	return deps.issues.getById(id)
 }
+
+// ============================================================================
+// Use Case Class (for container DI)
+// ============================================================================
+
+export class ReadIssueUseCase {
+	private issueRepo: IssueRepository
+
+	constructor(issueRepo: IssueRepository) {
+		this.issueRepo = issueRepo
+	}
+
+	async list(filters?: ReadIssuesQuery): Promise<{
+		success: boolean
+		data?: Issue[]
+		error?: string
+	}> {
+		try {
+			const result = await readIssues({ issues: this.issueRepo }, filters ?? {})
+			return { success: true, data: result.items }
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Failed to read issues'
+			}
+		}
+	}
+
+	async byId(id: string): Promise<{
+		success: boolean
+		data?: Issue
+		error?: string
+	}> {
+		try {
+			const issue = await readIssueById({ issues: this.issueRepo }, id)
+			if (!issue) {
+				return { success: false, error: 'Issue not found' }
+			}
+			return { success: true, data: issue }
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Failed to read issue'
+			}
+		}
+	}
+
+	async byProject(projectId: string): Promise<{
+		success: boolean
+		data?: Issue[]
+		error?: string
+	}> {
+		try {
+			const result = await readIssues({ issues: this.issueRepo }, { projectId })
+			return { success: true, data: result.items }
+		} catch (error) {
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Failed to read issues'
+			}
+		}
+	}
+}

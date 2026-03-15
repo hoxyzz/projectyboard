@@ -12,6 +12,7 @@ import { container } from "../container";
  */
 export async function createProject(data: {
   name: string;
+  key?: string;
   description?: string;
   color?: string;
 }) {
@@ -19,7 +20,7 @@ export async function createProject(data: {
   
   const result = await useCases.create.execute({
     name: data.name,
-    description: data.description,
+    key: data.key,
     color: data.color,
   });
 
