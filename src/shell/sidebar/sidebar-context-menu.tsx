@@ -21,18 +21,18 @@ export function SidebarContextMenu({ config, children }: SidebarContextMenuProps
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
-			<ContextMenuContent className="w-52 bg-li-menu-bg border-li-menu-border rounded-lg shadow-xl p-1">
+			<ContextMenuContent className="w-52 rounded-lg border-sidebar-border bg-sidebar p-1 text-sidebar-foreground shadow-xl">
 				{config.items.map((item, i) =>
 					item.separator ? (
-						<ContextMenuSeparator key={`sep-${i}`} className="bg-li-divider" />
+						<ContextMenuSeparator key={`sep-${i}`} className="bg-sidebar-border/70" />
 					) : (
 						<ContextMenuItem
 							key={item.id}
 							onClick={item.action}
 							disabled={item.disabled}
-							className="text-[12.5px] text-li-text hover:text-li-text-bright hover:bg-li-menu-bg-hover rounded-md cursor-pointer gap-2"
+							className="cursor-pointer gap-2 rounded-md text-[12.5px] text-sidebar-foreground/78 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
 						>
-							{item.icon && <item.icon className="h-3.5 w-3.5 text-li-text-muted" />}
+							{item.icon && <item.icon className="h-3.5 w-3.5 text-sidebar-foreground/58" />}
 							{item.label}
 						</ContextMenuItem>
 					)

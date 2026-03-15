@@ -18,7 +18,8 @@ import {
 	MessageSquare,
 	MoreHorizontal,
 	Search,
-	Settings
+	Settings,
+	Keyboard
 } from 'lucide-react'
 
 import { NotificationInboxPopover } from '@/domains/inbox/notification-inbox-popover'
@@ -39,6 +40,7 @@ export type SidebarConfigParams = {
 	onTeamSettings?: OptionalAction<string>
 	onLeaveTeam?: OptionalAction<string>
 	onNavigate?: OptionalAction<string>
+	onCheatsheet?: OptionalAction
 }
 
 export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
@@ -50,7 +52,8 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
 		teams,
 		onSearch,
 		onTeamSettings,
-		onLeaveTeam
+		onLeaveTeam,
+		onCheatsheet
 	} = params
 
 	return {
@@ -59,12 +62,20 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
 			actions: (
 				<div className="flex items-center gap-0.5">
 					<button
-						className="h-6 w-6 flex items-center justify-center rounded hover:bg-li-bg-hover transition-colors"
+						className="flex h-7 w-7 items-center justify-center rounded-md text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
 						onClick={() => onSearch?.()}
+						title="Search"
 					>
-						<Search className="h-3.5 w-3.5 text-li-text-muted" />
+						<Search className="h-3.5 w-3.5" />
 					</button>
-					<NotificationInboxPopover className="relative h-6 w-6 rounded hover:bg-li-bg-hover transition-colors flex items-center justify-center" />
+					<button
+						className="flex h-7 w-7 items-center justify-center rounded-md text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+						onClick={() => onCheatsheet?.()}
+						title="Keyboard shortcuts"
+					>
+						<Keyboard className="h-3.5 w-3.5" />
+					</button>
+					<NotificationInboxPopover className="relative flex h-7 w-7 items-center justify-center rounded-md text-sidebar-foreground/65 transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground" />
 				</div>
 			)
 		},
@@ -166,8 +177,8 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
 		footerItems: [],
 		footerSlot: (
 			<div className="flex flex-col gap-0.5">
-				<span className="text-[11px] text-li-text-muted">What's new</span>
-				<span className="text-[12px] text-li-text">Deeplink to AI coding tools</span>
+				<span className="text-[11px] text-sidebar-foreground/55">What's new</span>
+				<span className="text-[12px] text-sidebar-foreground/78">Deeplink to AI coding tools</span>
 			</div>
 		)
 	}

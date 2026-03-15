@@ -1,12 +1,10 @@
 "use client";
 
-import { X } from "lucide-react";
 import { useEffect, useId } from "react";
 
 import { Kbd, getModKey } from "@/shared/components/kbd";
 import {
 	Dialog,
-	DialogClose,
 	DialogContent,
 	DialogDescription,
 	DialogHeader,
@@ -19,8 +17,10 @@ import {
 	DrawerHeader,
 	DrawerTitle,
 } from "@/shared/components/ui/drawer";
+import { Switch } from "@/shared/components/ui/switch";
 import { useIsMobile } from "@/shared/hooks/use-mobile";
 import { cn } from "@/shared/lib/utils";
+import { useShortcutDebugStore } from "@/shared/stores/shortcut-debug-store";
 
 type Props = {
 	open: boolean;
@@ -123,14 +123,16 @@ function ShortcutSection({
 
 function ShortcutCheatsheetBody({
 	descriptionId,
-	onClose,
+	debugEnabled,
+	onDebugChange,
 }: {
 	descriptionId: string;
-	onClose: () => void;
+	debugEnabled: boolean;
+	onDebugChange: (checked: boolean) => void;
 }) {
 	return (
 		<>
-			<div className="flex items-start justify-between gap-4 border-b border-li-border px-4 py-4 sm:px-5">
+			<div className="border-b border-li-border px-4 py-4 sm:px-5">
 				<div>
 					<p
 						id={descriptionId}
@@ -140,14 +142,26 @@ function ShortcutCheatsheetBody({
 						is open, the app behind it is inert.
 					</p>
 				</div>
-				<button
-					type="button"
-					onClick={onClose}
-					className="rounded-md p-2 text-li-text-muted transition-colors hover:bg-li-bg-hover hover:text-li-text-bright focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--border-strong))]"
-					aria-label="Close keyboard shortcuts"
-				>
-					<X className="h-4 w-4" aria-hidden="true" />
-				</button>
+				<div className="mt-4 flex items-center justify-between gap-4 rounded-xl border border-li-border/70 bg-li-bg-hover/30 px-3 py-2.5">
+					<div className="min-w-0">
+						<p className="text-[12px] font-medium text-li-text-bright">
+							Shortcut debug overlay
+						</p>
+						<p className="text-[11px] text-li-text-muted">
+							Shows captured keyboard events and shortcut handling.
+						</p>
+					</div>
+					<div className="flex items-center gap-2">
+						<span className="text-[11px] uppercase tracking-[0.14em] text-li-text-muted">
+							{debugEnabled ? "On" : "Off"}
+						</span>
+						<Switch
+							checked={debugEnabled}
+							onCheckedChange={onDebugChange}
+							aria-label="Toggle shortcut debug overlay"
+						/>
+					</div>
+				</div>
 			</div>
 
 			<div className="max-h-[min(72vh,40rem)] overflow-y-auto px-4 py-4 sm:px-5 sm:py-5">
@@ -164,6 +178,8 @@ function ShortcutCheatsheetBody({
 export function ShortcutCheatsheet({ open, onOpenChange }: Props) {
 	const isMobile = useIsMobile();
 	const descriptionId = useId();
+	const debugEnabled = useShortcutDebugStore((state) => state.enabled);
+	const setDebugEnabled = useShortcutDebugStore((state) => state.setEnabled);
 
 	useEffect(() => {
 		const appShell = document.querySelector<HTMLElement>(APP_SHELL_SELECTOR);
@@ -197,7 +213,8 @@ export function ShortcutCheatsheet({ open, onOpenChange }: Props) {
 					</DrawerHeader>
 					<ShortcutCheatsheetBody
 						descriptionId={descriptionId}
-						onClose={() => onOpenChange(false)}
+						debugEnabled={debugEnabled}
+						onDebugChange={setDebugEnabled}
 					/>
 				</DrawerContent>
 			</Drawer>
@@ -220,9 +237,9 @@ export function ShortcutCheatsheet({ open, onOpenChange }: Props) {
 				</DialogHeader>
 				<ShortcutCheatsheetBody
 					descriptionId={descriptionId}
-					onClose={() => onOpenChange(false)}
+					debugEnabled={debugEnabled}
+					onDebugChange={setDebugEnabled}
 				/>
-				<DialogClose className="sr-only">Close</DialogClose>
 			</DialogContent>
 		</Dialog>
 	);

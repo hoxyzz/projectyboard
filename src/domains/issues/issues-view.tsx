@@ -1,4 +1,5 @@
-import { ArrowUpDown, ChevronDown, ChevronRight, Filter, Plus } from 'lucide-react'
+import { notify } from '@remcostoeten/notifier'
+import { ArrowUpDown, ChevronDown, ChevronRight, Filter, Plus, Search, X } from 'lucide-react'
 import { useCallback, useMemo, useState } from 'react'
 
 import type { Issue, IssueStatus, Priority } from '@/domains/issues/types'
@@ -12,18 +13,18 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
-import { useIssues, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
+import { Input } from '@/shared/components/ui/input'
+import { useIssueLabels, useIssueProjects, useIssues, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
 import { useStructuralNavigation } from '@/shared/hooks/use-structural-navigation'
 import { useNavigate } from '@/shared/lib/navigation'
 import { cn } from '@/shared/lib/utils'
 import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
 
 import { CreateIssueModal } from './create-issue-modal'
+import { PRIORITY_OPTIONS, STATUS_OPTIONS } from './options'
 import {
 	IssueDetailPanel,
-	PRIORITY_OPTIONS,
 	PriorityIcon,
-	STATUS_OPTIONS,
 	StatusIcon
 } from './issue-detail-panel'
 
@@ -83,10 +84,10 @@ function IssueRow({
 				ref={rowRef}
 				data-nav-id={navId}
 				className={cn(
-					'flex items-center h-[34px] px-4 hover:bg-li-bg-hover transition-colors cursor-pointer group outline-none',
+					'group flex h-[30px] cursor-pointer items-center px-3.5 transition-colors outline-none hover:bg-li-bg-hover',
 					!expanded && 'border-b border-li-divider',
 					expanded && 'bg-li-bg-hover/60',
-					focused && 'bg-li-bg-hover ring-1 ring-inset ring-li-dot-blue/35'
+					focused && 'bg-li-bg-hover ring-1 ring-inset ring-white/12'
 				)}
 				onClick={onToggle}
 				onFocus={onFocus}
@@ -102,7 +103,7 @@ function IssueRow({
 				role="button"
 				aria-expanded={expanded}
 			>
-				<div className="flex items-center gap-2.5 flex-1 min-w-0">
+				<div className="flex min-w-0 flex-1 items-center gap-2">
 					<ChevronRight
 						className={cn(
 							'h-3 w-3 text-li-text-muted transition-transform duration-200',
@@ -144,9 +145,9 @@ function IssueRow({
 						</DropdownMenuContent>
 					</DropdownMenu>
 
-					<span className="text-[13px] text-li-text-bright truncate">{issue.title}</span>
+					<span className="truncate text-[12.5px] text-li-text-bright">{issue.title}</span>
 					{issue.subIssues && (
-						<span className="text-[11px] text-li-text-muted shrink-0 bg-li-badge-bg rounded px-1.5 py-0.5">
+						<span className="shrink-0 rounded bg-li-badge-bg px-1.5 py-0.5 text-[10px] text-li-text-muted">
 							{issue.subIssues.done}/{issue.subIssues.total}
 						</span>
 					)}
@@ -156,18 +157,18 @@ function IssueRow({
 						</span>
 					)}
 				</div>
-				<div className="flex items-center gap-3 shrink-0 ml-4">
+				<div className="ml-4 flex shrink-0 items-center gap-2">
 					{issue.labels?.map((label) => (
 						<span
 							key={label.id}
-							className="text-[11px] px-1.5 py-0.5 rounded"
+							className="rounded px-1.5 py-0.5 text-[10px]"
 							style={{ color: label.color, backgroundColor: `${label.color}15` }}
 						>
 							{label.name}
 						</span>
 					))}
 					{issue.projectName && (
-						<span className="text-[11px] text-li-text-muted truncate max-w-[160px]">
+						<span className="max-w-[140px] truncate text-[10.5px] text-li-text-muted">
 							{issue.projectName}
 						</span>
 					)}
@@ -319,6 +320,9 @@ type IssuesViewProps = {
 export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 	const [statusFilter, setStatusFilter] = useState<IssueStatus[]>([])
 	const [priorityFilter, setPriorityFilter] = useState<Priority[]>([])
+	const [labelFilter, setLabelFilter] = useState<string[]>([])
+	const [projectFilter, setProjectFilter] = useState<string>('')
+	const [searchQuery, setSearchQuery] = useState('')
 	const [sortField, setSortField] = useState<SortField>('priority')
 	const [sortDir, setSortDir] = useState<SortDir>('asc')
 	const [createOpen, setCreateOpen] = useState(false)
@@ -326,6 +330,8 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 	const navigate = useNavigate()
 
 	const { data, isLoading } = useIssues()
+	const { data: projects = [] } = useIssueProjects()
+	const { data: labels = [] } = useIssueLabels()
 	const updateIssue = useUpdateIssue()
 
 	const allIssues = useMemo(() => data?.data ?? [], [data?.data])
@@ -335,6 +341,22 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 		if (statusFilter.length) result = result.filter((i) => statusFilter.includes(i.status))
 		if (priorityFilter.length)
 			result = result.filter((i) => priorityFilter.includes(i.priority))
+		if (projectFilter) result = result.filter((i) => i.projectId === projectFilter)
+		if (searchQuery.trim()) {
+			const query = searchQuery.trim().toLowerCase()
+			result = result.filter(
+				(i) =>
+					i.title.toLowerCase().includes(query) ||
+					i.identifier.toLowerCase().includes(query) ||
+					i.projectName?.toLowerCase().includes(query) ||
+					i.labels.some((label) => label.name.toLowerCase().includes(query))
+			)
+		}
+		if (labelFilter.length) {
+			result = result.filter((i) =>
+				labelFilter.every((labelId) => i.labels.some((label) => label.id === labelId))
+			)
+		}
 
 		result = [...result].sort((a, b) => {
 			let cmp = 0
@@ -355,14 +377,27 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 			return sortDir === 'desc' ? -cmp : cmp
 		})
 		return result
-	}, [allIssues, statusFilter, priorityFilter, sortField, sortDir])
+	}, [
+		allIssues,
+		statusFilter,
+		priorityFilter,
+		projectFilter,
+		searchQuery,
+		labelFilter,
+		sortField,
+		sortDir
+	])
 
 	const handleStatusChange = (issue: Issue, status: IssueStatus) => {
-		updateIssue.mutate({ id: issue.id, input: { status } })
+		void updateIssue.mutateAsync({ id: issue.id, input: { status } }).catch((error) => {
+			notify.error(error instanceof Error ? error.message : 'Failed to update status')
+		})
 	}
 
 	const handlePriorityChange = (issue: Issue, priority: Priority) => {
-		updateIssue.mutate({ id: issue.id, input: { priority } })
+		void updateIssue.mutateAsync({ id: issue.id, input: { priority } }).catch((error) => {
+			notify.error(error instanceof Error ? error.message : 'Failed to update priority')
+		})
 	}
 
 	const grouped = useMemo(() => {
@@ -419,49 +454,123 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 		)
 	}
 
-	const activeFilters = statusFilter.length + priorityFilter.length
+	const activeFilters =
+		statusFilter.length +
+		priorityFilter.length +
+		labelFilter.length +
+		(projectFilter ? 1 : 0) +
+		(searchQuery.trim() ? 1 : 0)
 
 	return (
 		<div className="flex-1 flex flex-col bg-li-content-bg min-h-0">
 			{/* Header */}
-			<div className="flex items-center justify-between h-11 px-4 border-b border-li-content-border shrink-0">
-				<div className="flex items-center gap-2">
-					<span className="text-[14px] font-medium text-li-text-bright">My Issues</span>
-					{activeFilters > 0 && (
-						<span className="text-[10px] text-li-text-badge bg-li-badge-bg rounded-full px-1.5 py-0.5">
-							{activeFilters} filter{activeFilters > 1 ? 's' : ''}
-						</span>
-					)}
-				</div>
-				<div className="flex items-center gap-1">
+			<div className="shrink-0 border-b border-li-content-border px-4 py-3">
+				<div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+					<div className="flex items-center gap-2">
+						<span className="text-[14px] font-medium text-li-text-bright">My Issues</span>
+						{activeFilters > 0 && (
+							<span className="rounded-full bg-li-badge-bg px-1.5 py-0.5 text-[10px] text-li-text-badge">
+								{activeFilters} filter{activeFilters > 1 ? 's' : ''}
+							</span>
+						)}
+					</div>
 					<button
 						onClick={() => setCreateOpen(true)}
-						className="flex items-center gap-1.5 text-[12px] text-li-text-bright bg-li-dot-blue hover:bg-li-dot-blue/90 transition-colors px-2.5 py-1 rounded mr-1"
+						className="mr-1 flex items-center gap-1.5 rounded-[6px] border border-white/8 bg-white/[0.06] px-2.5 py-1 text-[12px] text-li-text-bright transition-colors hover:bg-white/[0.09]"
 					>
 						<Plus className="h-3 w-3" />
 						New
 						<Kbd keys={['N']} className="ml-0.5" />
 					</button>
-					<MultiFilterDropdown
-						label="Status"
-						options={STATUS_OPTIONS}
-						selected={statusFilter}
-						onChange={setStatusFilter}
-					/>
-					<MultiFilterDropdown
-						label="Priority"
-						options={PRIORITY_OPTIONS}
-						selected={priorityFilter}
-						onChange={setPriorityFilter}
-					/>
-					<SortDropdown
-						sortField={sortField}
-						sortDir={sortDir}
-						onChange={(f, d) => {
-							setSortField(f)
-							setSortDir(d)
-						}}
-					/>
+				</div>
+
+				<div className="flex flex-col gap-2 lg:flex-row lg:items-center">
+					<div className="relative w-full lg:max-w-[320px] lg:flex-1">
+						<Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-li-text-muted" />
+						<Input
+							value={searchQuery}
+							onChange={(event) => setSearchQuery(event.target.value)}
+							placeholder="Search issues, labels, projects..."
+							className="h-8 border-white/8 bg-white/[0.03] pl-8 pr-8 text-[12px] text-li-text-bright placeholder:text-li-text-muted"
+						/>
+						{searchQuery && (
+							<button
+								type="button"
+								onClick={() => setSearchQuery('')}
+								className="absolute right-2 top-1/2 -translate-y-1/2 text-li-text-muted transition-colors hover:text-li-text-bright"
+							>
+								<X className="h-3.5 w-3.5" />
+							</button>
+						)}
+					</div>
+
+					<div className="flex flex-wrap items-center gap-1">
+						<MultiFilterDropdown
+							label="Status"
+							options={STATUS_OPTIONS}
+							selected={statusFilter}
+							onChange={setStatusFilter}
+						/>
+						<MultiFilterDropdown
+							label="Priority"
+							options={PRIORITY_OPTIONS}
+							selected={priorityFilter}
+							onChange={setPriorityFilter}
+						/>
+						<MultiFilterDropdown
+							label="Label"
+							options={labels.map((label) => ({ value: label.id, label: label.name }))}
+							selected={labelFilter}
+							onChange={setLabelFilter}
+						/>
+						<DropdownMenu>
+							<DropdownMenuTrigger asChild>
+								<button className="flex items-center gap-1 rounded px-2 py-1 text-[12px] text-li-text-muted transition-colors hover:bg-li-bg-hover hover:text-li-text-bright">
+									<Filter className="h-3 w-3" />
+									{projectFilter
+										? projects.find((project) => project.id === projectFilter)?.name ?? 'Project'
+										: 'Project'}
+									{projectFilter && (
+										<span className="rounded-full bg-li-badge-bg px-1.5 text-[10px] text-li-text-badge">
+											1
+										</span>
+									)}
+									<ChevronDown className="h-3 w-3" />
+								</button>
+							</DropdownMenuTrigger>
+							<DropdownMenuContent className="min-w-[180px] border-li-menu-border bg-li-menu-bg">
+								<DropdownMenuCheckboxItem
+									checked={!projectFilter}
+									onCheckedChange={() => setProjectFilter('')}
+									className="cursor-pointer text-[12px] text-li-text-muted hover:bg-li-menu-bg-hover"
+								>
+									All projects
+								</DropdownMenuCheckboxItem>
+								{projects.map((project) => (
+									<DropdownMenuCheckboxItem
+										key={project.id}
+										checked={projectFilter === project.id}
+										onCheckedChange={() =>
+											setProjectFilter((current) =>
+												current === project.id ? '' : project.id
+											)
+										}
+										className="cursor-pointer text-[12px] text-li-text-bright hover:bg-li-menu-bg-hover"
+									>
+										{project.name}
+									</DropdownMenuCheckboxItem>
+								))}
+							</DropdownMenuContent>
+						</DropdownMenu>
+						<SortDropdown
+							sortField={sortField}
+							sortDir={sortDir}
+							onChange={(f, d) => {
+								setSortField(f)
+								setSortDir(d)
+							}}
+						/>
+					</div>
 				</div>
 			</div>
 

@@ -7,8 +7,7 @@ import {
 	Clock,
 	ExternalLink,
 	FileText,
-	Tag,
-	User
+	Tag
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
@@ -22,26 +21,8 @@ import {
 	DropdownMenuLabel,
 	DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
-import { useUpdateIssue } from '@/domains/issues/hooks/use-issues'
 import { cn } from '@/shared/lib/utils'
-
-// ─── Shared constants ───────────────────────────────────
-
-export const STATUS_OPTIONS: { value: IssueStatus; label: string; color: string }[] = [
-	{ value: 'backlog', label: 'Backlog', color: 'hsl(var(--li-text-muted))' },
-	{ value: 'todo', label: 'Todo', color: 'hsl(var(--li-text-muted))' },
-	{ value: 'in_progress', label: 'In Progress', color: 'hsl(var(--li-status-progress))' },
-	{ value: 'done', label: 'Done', color: 'hsl(var(--li-status-done))' },
-	{ value: 'cancelled', label: 'Cancelled', color: 'hsl(var(--li-dot-red))' }
-]
-
-export const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
-	{ value: 'urgent', label: 'Urgent' },
-	{ value: 'high', label: 'High' },
-	{ value: 'medium', label: 'Medium' },
-	{ value: 'low', label: 'Low' },
-	{ value: 'none', label: 'No priority' }
-]
+import { PRIORITY_OPTIONS, STATUS_OPTIONS } from '@/domains/issues/options'
 
 // ─── Icons ──────────────────────────────────────────────
 
@@ -287,7 +268,7 @@ export function IssueDetailPanel({
 							</h4>
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<button className="flex items-center gap-1.5 text-[12px] text-li-text-bright hover:bg-li-bg-hover rounded px-1.5 py-0.5 transition-colors -ml-1.5">
+									<button className="flex items-center gap-1.5 rounded-[6px] px-1.5 py-0.5 text-[12px] text-li-text-bright transition-colors -ml-1.5 hover:bg-li-bg-hover">
 										<span
 											className="h-2 w-2 rounded-full"
 											style={{ backgroundColor: statusOpt?.color }}
@@ -321,7 +302,7 @@ export function IssueDetailPanel({
 							</h4>
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<button className="flex items-center gap-1.5 text-[12px] text-li-text-bright hover:bg-li-bg-hover rounded px-1.5 py-0.5 transition-colors -ml-1.5">
+									<button className="flex items-center gap-1.5 rounded-[6px] px-1.5 py-0.5 text-[12px] text-li-text-bright transition-colors -ml-1.5 hover:bg-li-bg-hover">
 										<PriorityIcon priority={issue.priority} />
 										{priorityOpt?.label}
 									</button>
@@ -368,19 +349,6 @@ export function IssueDetailPanel({
 							)}
 						</div>
 
-						{/* Assignee */}
-						<div>
-							<h4 className="text-[10px] font-medium text-li-text-muted uppercase tracking-wider mb-1">
-								Assignee
-							</h4>
-							<div className="flex items-center gap-1.5">
-								<User className="h-3 w-3 text-li-text-muted" />
-								<span className="text-[12px] text-li-text-bright">
-									{issue.assigneeName ?? 'Unassigned'}
-								</span>
-							</div>
-						</div>
-
 						{/* Project */}
 						{issue.projectName && (
 							<div>
@@ -399,7 +367,7 @@ export function IssueDetailPanel({
 								e.stopPropagation()
 								onOpenFull(issue)
 							}}
-							className="flex items-center gap-1.5 text-[11px] text-li-dot-blue hover:text-li-dot-blue/80 transition-colors mt-2"
+							className="mt-2 flex items-center gap-1.5 text-[11px] text-li-text-muted transition-colors hover:text-li-text-bright"
 						>
 							<ExternalLink className="h-3 w-3" />
 							Open full view

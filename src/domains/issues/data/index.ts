@@ -1,14 +1,39 @@
-import type { IssueData } from '../types'
+import type {
+	IssueLabelRepository,
+	IssueProjectRepository,
+	IssueRepository
+} from '../types'
 
-import { createMockIssueData } from './issues.mock'
+import {
+	createMockIssueLabelRepository,
+	createMockIssueProjectRepository,
+	createMockIssueRepository,
+	resetMockIssueState
+} from './issues.mock'
 
-let issueData: IssueData | null = null
+let issueRepository: IssueRepository | null = null
+let issueProjectRepository: IssueProjectRepository | null = null
+let issueLabelRepository: IssueLabelRepository | null = null
 
-export function getIssueData(): IssueData {
-	if (!issueData) issueData = createMockIssueData()
-	return issueData
+export function getIssueRepository(): IssueRepository {
+	if (!issueRepository) issueRepository = createMockIssueRepository()
+	return issueRepository
+}
+
+export function getIssueProjectRepository(): IssueProjectRepository {
+	if (!issueProjectRepository) issueProjectRepository = createMockIssueProjectRepository()
+	return issueProjectRepository
+}
+
+export function getIssueLabelRepository(): IssueLabelRepository {
+	if (!issueLabelRepository) issueLabelRepository = createMockIssueLabelRepository()
+	return issueLabelRepository
 }
 
 export function resetIssueData() {
-	issueData = null
+	issueRepository = null
+	issueProjectRepository = null
+	issueLabelRepository = null
+	resetMockIssueState()
 }
+

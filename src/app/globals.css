@@ -15,36 +15,36 @@
 		--card-foreground: 240 5% 90%;
 		--popover: 240 6% 12%;
 		--popover-foreground: 240 5% 90%;
-		--primary: 217 80% 55%;
+		--primary: 222 12% 68%;
 		--primary-foreground: 240 5% 90%;
-		--secondary: 240 5% 15%;
+		--secondary: 240 4% 14%;
 		--secondary-foreground: 240 5% 90%;
-		--muted: 240 5% 13%;
-		--muted-foreground: 240 4% 42%;
-		--accent: 240 5% 13%;
+		--muted: 240 4% 12%;
+		--muted-foreground: 240 4% 50%;
+		--accent: 240 4% 11%;
 		--accent-foreground: 240 5% 90%;
 		--destructive: 0 72% 51%;
 		--destructive-foreground: 240 5% 90%;
-		--border: 240 4% 16%;
-		--input: 240 4% 16%;
-		--ring: 217 80% 55%;
-		--radius: 0.5rem;
+		--border: 240 4% 15%;
+		--input: 240 4% 15%;
+		--ring: 240 5% 62%;
+		--radius: 0.375rem;
 
 		/* Minimal app-specific extension layer */
 		--surface-elevated: var(--card);
 		--surface-popover: var(--popover);
-		--surface-hover: var(--accent);
+		--surface-hover: 240 4% 13%;
 		--surface-pressed: var(--secondary);
-		--surface-subtle: 240 5% 18%;
-		--text-secondary: 240 5% 58%;
+		--surface-subtle: 240 4% 16%;
+		--text-secondary: 240 5% 63%;
 		--text-badge: 240 5% 64%;
-		--border-subtle: 240 4% 14%;
-		--border-strong: 240 4% 18%;
+		--border-subtle: 240 4% 13%;
+		--border-strong: 240 4% 19%;
 		--success: 142 60% 45%;
 		--warning: 28 80% 52%;
-		--info: var(--primary);
+		--info: 215 78% 62%;
 		--danger: var(--destructive);
-		--brand-alt: 270 60% 55%;
+		--brand-alt: 266 38% 58%;
 		--li-label-crud: 220 14% 46%;
 		--li-label-feature: 270 50% 50%;
 		--li-label-database: 35 80% 50%;
@@ -106,7 +106,7 @@
 		outline: none;
 		box-shadow:
 			0 0 0 1px hsl(var(--border-strong)),
-			0 0 0 3px hsl(var(--ring) / 0.22);
+			0 0 0 2px hsl(var(--ring) / 0.14);
 	}
 
 	.focus-ring-none:focus-visible {

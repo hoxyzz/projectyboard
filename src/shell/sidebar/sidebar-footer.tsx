@@ -11,10 +11,10 @@ export function SidebarFooter({ items, slot }: SidebarFooterProps) {
 	if (!items?.length && !slot) return null
 
 	return (
-		<div className="mt-auto shrink-0 flex flex-col">
+		<div className="mt-auto flex shrink-0 flex-col">
 			{items && items.length > 0 && (
 				<div className="px-3 pb-1">
-					<span className="text-[11px] font-medium tracking-[0.06em] uppercase text-li-text-muted select-none">
+					<span className="select-none text-[11px] font-medium uppercase tracking-[0.06em] text-sidebar-foreground/55">
 						Try
 					</span>
 				</div>
@@ -26,7 +26,7 @@ export function SidebarFooter({ items, slot }: SidebarFooterProps) {
 					))}
 				</div>
 			)}
-			{slot && <div className="border-t border-li-divider px-3 py-2">{slot}</div>}
+			{slot && <div className="border-t border-sidebar-border/70 px-3 py-2">{slot}</div>}
 		</div>
 	)
 }

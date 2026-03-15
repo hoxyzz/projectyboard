@@ -2,9 +2,15 @@ import type { PaginatedResult } from '@/shared/types'
 
 import type {
 	CreateIssueInput,
-	IssueData,
+	CreateIssueLabelInput,
+	CreateIssueProjectInput,
 	Issue,
 	IssueFilters,
+	IssueLabel,
+	IssueLabelRepository,
+	IssueProject,
+	IssueProjectRepository,
+	IssueRepository,
 	UpdateIssueInput
 } from '../types'
 
@@ -20,7 +26,7 @@ function buildHeaders(config: ApiIssueDataConfig): HeadersInit {
 		...config.headers
 	}
 	const token = config.getToken?.()
-	if (token) headers['Authorization'] = `Bearer ${token}`
+	if (token) headers.Authorization = `Bearer ${token}`
 	return headers
 }
 
@@ -32,7 +38,7 @@ async function handleResponse<T>(res: Response): Promise<T> {
 	return res.json()
 }
 
-export function createApiIssueData(config: ApiIssueDataConfig): IssueData {
+export function createApiIssueRepository(config: ApiIssueDataConfig): IssueRepository {
 	const { baseUrl } = config
 
 	return {
@@ -42,10 +48,9 @@ export function createApiIssueData(config: ApiIssueDataConfig): IssueData {
 			if (filters?.priority?.length) params.set('priority', filters.priority.join(','))
 			if (filters?.search) params.set('search', filters.search)
 			if (filters?.projectId) params.set('projectId', filters.projectId)
-			if (filters?.assigneeId) params.set('assigneeId', filters.assigneeId)
 
-			const qs = params.toString()
-			const res = await fetch(`${baseUrl}/issues${qs ? `?${qs}` : ''}`, {
+			const queryString = params.toString()
+			const res = await fetch(`${baseUrl}/issues${queryString ? `?${queryString}` : ''}`, {
 				headers: buildHeaders(config)
 			})
 			return handleResponse<PaginatedResult<Issue>>(res)
@@ -79,6 +84,76 @@ export function createApiIssueData(config: ApiIssueDataConfig): IssueData {
 
 		async destroy(id: string): Promise<void> {
 			const res = await fetch(`${baseUrl}/issues/${id}`, {
+				method: 'DELETE',
+				headers: buildHeaders(config)
+			})
+			if (!res.ok) {
+				const body = await res.text().catch(() => '')
+				throw new Error(`API error ${res.status}: ${body}`)
+			}
+		}
+	}
+}
+
+export function createApiIssueProjectRepository(
+	config: ApiIssueDataConfig
+): IssueProjectRepository {
+	const { baseUrl } = config
+
+	return {
+		async listProjects(): Promise<IssueProject[]> {
+			const res = await fetch(`${baseUrl}/issue-projects`, {
+				headers: buildHeaders(config)
+			})
+			return handleResponse<IssueProject[]>(res)
+		},
+
+		async createProject(input: CreateIssueProjectInput): Promise<IssueProject> {
+			const res = await fetch(`${baseUrl}/issue-projects`, {
+				method: 'POST',
+				headers: buildHeaders(config),
+				body: JSON.stringify(input)
+			})
+			return handleResponse<IssueProject>(res)
+		},
+
+		async deleteProject(id: string): Promise<void> {
+			const res = await fetch(`${baseUrl}/issue-projects/${id}`, {
+				method: 'DELETE',
+				headers: buildHeaders(config)
+			})
+			if (!res.ok) {
+				const body = await res.text().catch(() => '')
+				throw new Error(`API error ${res.status}: ${body}`)
+			}
+		}
+	}
+}
+
+export function createApiIssueLabelRepository(
+	config: ApiIssueDataConfig
+): IssueLabelRepository {
+	const { baseUrl } = config
+
+	return {
+		async listLabels(): Promise<IssueLabel[]> {
+			const res = await fetch(`${baseUrl}/issue-labels`, {
+				headers: buildHeaders(config)
+			})
+			return handleResponse<IssueLabel[]>(res)
+		},
+
+		async createLabel(input: CreateIssueLabelInput): Promise<IssueLabel> {
+			const res = await fetch(`${baseUrl}/issue-labels`, {
+				method: 'POST',
+				headers: buildHeaders(config),
+				body: JSON.stringify(input)
+			})
+			return handleResponse<IssueLabel>(res)
+		},
+
+		async deleteLabel(id: string): Promise<void> {
+			const res = await fetch(`${baseUrl}/issue-labels/${id}`, {
 				method: 'DELETE',
 				headers: buildHeaders(config)
 			})

@@ -35,13 +35,13 @@ export function SidebarRoot({ config }: SidebarRootProps) {
 	return (
 		<aside
 			className={cn(
-				'h-screen flex flex-col bg-li-bg border-r border-li-border shrink-0 transition-[width] duration-200 ease-in-out overflow-hidden',
+				'h-screen shrink-0 overflow-hidden border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-200 ease-in-out flex flex-col',
 				collapsed ? 'w-0' : 'w-[240px]'
 			)}
 		>
 			<SidebarHeader user={config.user} />
 
-			<div className="h-px bg-li-divider mx-3" />
+			<div className="mx-3 h-px bg-sidebar-border/70" />
 
 			<ScrollArea className="flex-1 min-h-0">
 				<div className="flex flex-col gap-3 py-2">
@@ -53,7 +53,7 @@ export function SidebarRoot({ config }: SidebarRootProps) {
 					</div>
 
 					{/* Divider */}
-					<div className="h-px bg-li-divider mx-3" />
+					<div className="mx-3 h-px bg-sidebar-border/70" />
 
 					{/* Sections */}
 					{config.sections.map((section) => (
@@ -63,9 +63,9 @@ export function SidebarRoot({ config }: SidebarRootProps) {
 					{/* Divider before teams */}
 					{config.teams.length > 0 && (
 						<>
-							<div className="h-px bg-li-divider mx-3" />
+							<div className="mx-3 h-px bg-sidebar-border/70" />
 							<div className="px-3">
-								<span className="text-[11px] font-medium tracking-[0.06em] uppercase text-li-text-muted select-none">
+								<span className="select-none text-[11px] font-medium uppercase tracking-[0.06em] text-sidebar-foreground/55">
 									Your teams
 								</span>
 							</div>

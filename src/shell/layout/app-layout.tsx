@@ -85,6 +85,21 @@ export function AppLayout({ children }: { children?: ReactNode }) {
 		{ preventDefault: true },
 	);
 
+	// Also support Ctrl+K explicitly for Linux
+	$.ctrl.key("k").on(
+		() => {
+			if (cheatsheetOpen) return;
+			logShortcutEvent({
+				source: "global",
+				combo: "Ctrl+K",
+				description: "Open search",
+				status: "handled",
+			});
+			setSearchOpen(true);
+		},
+		{ preventDefault: true },
+	);
+
 	// Navigation sequences: g then letter
 	$.key("g")
 		.then("i")
@@ -177,7 +192,14 @@ export function AppLayout({ children }: { children?: ReactNode }) {
 
 	$.mod.shift.key("d").on(
 		() => {
-			if (cheatsheetOpen) return;
+			toggleShortcutDebug();
+		},
+		{ description: "Toggle shortcut debug overlay" },
+	);
+
+	// Also support Ctrl+Shift+D explicitly for Linux
+	$.ctrl.shift.key("d").on(
+		() => {
 			toggleShortcutDebug();
 		},
 		{ description: "Toggle shortcut debug overlay" },
@@ -201,6 +223,7 @@ export function AppLayout({ children }: { children?: ReactNode }) {
 				onTeamSettings: null,
 				onLeaveTeam: null,
 				onNavigate: (path: string) => navigate(`/${path}`),
+				onCheatsheet: () => setCheatsheetOpen(true),
 			}),
 		[user, inboxCount, reviewCount, myIssuesCount, teams, navigate],
 	);

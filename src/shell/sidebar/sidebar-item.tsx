@@ -29,7 +29,7 @@ export function SidebarItem({ item, indent }: SidebarItemProps) {
 				<item.icon
 					className={cn(
 						'h-4 w-4 shrink-0',
-						isActive ? 'text-li-text-bright' : 'text-li-text-muted'
+						isActive ? 'text-sidebar-accent-foreground' : 'text-sidebar-foreground/58'
 					)}
 				/>
 			)}
@@ -38,7 +38,7 @@ export function SidebarItem({ item, indent }: SidebarItemProps) {
 			{/* Right side: badge count + shortcut on hover */}
 			<span className="ml-auto flex items-center gap-1.5 shrink-0">
 				{item.badge != null && (
-					<span className="text-[11px] tabular-nums text-li-text-badge min-w-[16px] text-right">
+					<span className="min-w-[16px] text-right text-[11px] tabular-nums text-sidebar-foreground/50">
 						{item.badge.count}
 					</span>
 				)}
@@ -53,10 +53,10 @@ export function SidebarItem({ item, indent }: SidebarItemProps) {
 	)
 
 	const className = cn(
-		'group/item flex items-center gap-2 h-[27px] px-2 rounded-md cursor-pointer select-none transition-colors duration-75',
+		'group/item flex h-[27px] cursor-pointer select-none items-center gap-2 rounded-md px-2 transition-colors duration-75',
 		isActive
-			? 'bg-li-bg-active text-li-text-bright font-medium'
-			: 'text-li-text hover:bg-li-bg-hover hover:text-li-text-bright'
+			? 'bg-sidebar-accent text-sidebar-accent-foreground font-medium'
+			: 'text-sidebar-foreground/72 hover:bg-sidebar-accent/70 hover:text-sidebar-foreground'
 	)
 
 	const style = indentPx ? { paddingLeft: indentPx } : undefined

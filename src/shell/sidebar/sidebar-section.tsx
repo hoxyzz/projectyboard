@@ -31,19 +31,19 @@ export function SidebarSection({ section }: SidebarSectionProps) {
 					<button
 						onClick={() => section.collapsible && toggleSection(section.id)}
 						className={cn(
-							'flex items-center gap-1 px-3 h-[26px] group',
+							'group flex h-[26px] items-center gap-1 px-3',
 							section.collapsible && 'cursor-pointer'
 						)}
 					>
 						{section.collapsible && (
 							<ChevronRight
 								className={cn(
-									'h-3 w-3 text-li-text-muted transition-transform duration-150',
+									'h-3 w-3 text-sidebar-foreground/45 transition-transform duration-150',
 									isOpen && 'rotate-90'
 								)}
 							/>
 						)}
-						<span className="text-[11px] font-medium tracking-[0.06em] uppercase text-li-text-muted select-none">
+						<span className="select-none text-[11px] font-medium uppercase tracking-[0.06em] text-sidebar-foreground/55">
 							{section.label}
 						</span>
 						{section.headerAction && (

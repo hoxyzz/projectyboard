@@ -35,14 +35,14 @@ export function SidebarTeam({ team }: SidebarTeamProps) {
 	return (
 		<div className="flex flex-col">
 			<SidebarContextMenu config={team.contextMenu}>
-				<div className="group flex items-center h-[27px] px-3 cursor-pointer select-none hover:bg-li-bg-hover rounded-md mx-1.5">
+				<div className="group mx-1.5 flex h-[27px] cursor-pointer select-none items-center rounded-md px-3 text-sidebar-foreground transition-colors hover:bg-sidebar-accent/70">
 					<button
 						onClick={() => toggleTeam(team.id)}
-						className="flex items-center gap-2 flex-1 min-w-0"
+						className="flex min-w-0 flex-1 items-center gap-2"
 					>
 						<ChevronRight
 							className={cn(
-								'h-3 w-3 text-li-text-muted transition-transform duration-150 shrink-0',
+								'h-3 w-3 shrink-0 text-sidebar-foreground/45 transition-transform duration-150',
 								isOpen && 'rotate-90'
 							)}
 						/>
@@ -52,7 +52,7 @@ export function SidebarTeam({ team }: SidebarTeamProps) {
 								backgroundColor: team.color || 'hsl(var(--li-dot-green))'
 							}}
 						/>
-						<span className="text-[13px] text-li-text-bright truncate">
+						<span className="truncate text-[13px] text-sidebar-foreground">
 							{team.label}
 						</span>
 					</button>
@@ -62,35 +62,35 @@ export function SidebarTeam({ team }: SidebarTeamProps) {
 							<DropdownMenuTrigger asChild>
 								<button
 									className={cn(
-										'h-5 w-5 flex items-center justify-center rounded shrink-0 transition-opacity',
+										'flex h-5 w-5 shrink-0 items-center justify-center rounded text-sidebar-foreground/58 transition-opacity hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
 										menuOpen
 											? 'opacity-100'
 											: 'opacity-0 group-hover:opacity-100'
 									)}
 									onClick={(e) => e.stopPropagation()}
 								>
-									<MoreHorizontal className="h-3.5 w-3.5 text-li-text-muted" />
+									<MoreHorizontal className="h-3.5 w-3.5" />
 								</button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent
 								align="start"
-								className="w-52 bg-li-menu-bg border-li-menu-border rounded-lg shadow-xl p-1"
+								className="w-52 rounded-lg border-sidebar-border bg-sidebar p-1 text-sidebar-foreground shadow-xl"
 							>
 								{team.contextMenu.items.map((menuItem, i) =>
 									menuItem.separator ? (
 										<DropdownMenuSeparator
 											key={`sep-${i}`}
-											className="bg-li-divider"
+											className="bg-sidebar-border/70"
 										/>
 									) : (
 										<DropdownMenuItem
 											key={menuItem.id}
 											onClick={menuItem.action}
 											disabled={menuItem.disabled}
-											className="text-[12.5px] text-li-text hover:text-li-text-bright hover:bg-li-menu-bg-hover rounded-md cursor-pointer gap-2"
+											className="cursor-pointer gap-2 rounded-md text-[12.5px] text-sidebar-foreground/78 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
 										>
 											{menuItem.icon && (
-												<menuItem.icon className="h-3.5 w-3.5 text-li-text-muted" />
+												<menuItem.icon className="h-3.5 w-3.5 text-sidebar-foreground/58" />
 											)}
 											{menuItem.label}
 										</DropdownMenuItem>
