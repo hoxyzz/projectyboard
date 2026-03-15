@@ -6,7 +6,6 @@
  */
 import {
 	Archive,
-	Bell,
 	BellRing,
 	CircleDot,
 	CircleUser,
@@ -22,6 +21,7 @@ import {
 	Settings
 } from 'lucide-react'
 
+import { NotificationInboxPopover } from '@/domains/inbox/notification-inbox-popover'
 import type { OptionalAction } from '@/shared/types'
 import type { SidebarConfig } from './types'
 
@@ -36,7 +36,6 @@ export type SidebarConfigParams = {
 		color?: string
 	}>
 	onSearch?: OptionalAction
-	onNotifications?: OptionalAction
 	onTeamSettings?: OptionalAction<string>
 	onLeaveTeam?: OptionalAction<string>
 	onNavigate?: OptionalAction<string>
@@ -50,7 +49,6 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
 		myIssuesCount,
 		teams,
 		onSearch,
-		onNotifications,
 		onTeamSettings,
 		onLeaveTeam
 	} = params
@@ -66,12 +64,7 @@ export function buildSidebarConfig(params: SidebarConfigParams): SidebarConfig {
 					>
 						<Search className="h-3.5 w-3.5 text-li-text-muted" />
 					</button>
-					<button
-						className="h-6 w-6 flex items-center justify-center rounded hover:bg-li-bg-hover transition-colors"
-						onClick={() => onNotifications?.()}
-					>
-						<Bell className="h-3.5 w-3.5 text-li-text-muted" />
-					</button>
+					<NotificationInboxPopover className="relative h-6 w-6 rounded hover:bg-li-bg-hover transition-colors flex items-center justify-center" />
 				</div>
 			)
 		},

@@ -172,6 +172,8 @@ function ActivityItem({ event }: { event: ActivityEvent }) {
 type IssueDetailPanelProps = {
 	issue: Issue
 	expanded: boolean
+	navParentId?: string
+	onFocusWithin?: () => void
 	onOpenFull: (issue: Issue) => void
 	onStatusChange: (issue: Issue, status: IssueStatus) => void
 	onPriorityChange: (issue: Issue, priority: Priority) => void
@@ -180,6 +182,8 @@ type IssueDetailPanelProps = {
 export function IssueDetailPanel({
 	issue,
 	expanded,
+	navParentId,
+	onFocusWithin,
 	onOpenFull,
 	onStatusChange,
 	onPriorityChange
@@ -227,6 +231,7 @@ export function IssueDetailPanel({
 
 	return (
 		<div
+			data-parent-nav-id={navParentId}
 			className="overflow-hidden border-b border-li-divider bg-li-bg/30"
 			style={{
 				height: expanded ? (isAnimating ? height : 'auto') : 0,
@@ -235,6 +240,7 @@ export function IssueDetailPanel({
 					'height 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
 			}}
 			onTransitionEnd={handleTransitionEnd}
+			onFocusCapture={onFocusWithin}
 		>
 			<div ref={contentRef} className="px-6 py-4">
 				<div className="flex gap-6">

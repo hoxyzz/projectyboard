@@ -4,47 +4,47 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		--background: 0 0% 100%;
-		--foreground: 222.2 84% 4.9%;
-		--card: 0 0% 100%;
-		--card-foreground: 222.2 84% 4.9%;
-		--popover: 0 0% 100%;
-		--popover-foreground: 222.2 84% 4.9%;
-		--primary: 222.2 47.4% 11.2%;
-		--primary-foreground: 210 40% 98%;
-		--secondary: 210 40% 96.1%;
-		--secondary-foreground: 222.2 47.4% 11.2%;
-		--muted: 210 40% 96.1%;
-		--muted-foreground: 215.4 16.3% 46.9%;
-		--accent: 210 40% 96.1%;
-		--accent-foreground: 222.2 47.4% 11.2%;
-		--destructive: 0 84.2% 60.2%;
-		--destructive-foreground: 210 40% 98%;
-		--border: 214.3 31.8% 91.4%;
-		--input: 214.3 31.8% 91.4%;
-		--ring: 222.2 84% 4.9%;
+	:root,
+	.theme-linear {
+		color-scheme: dark;
+
+		/* Standard theme API: define a new theme by overriding this pack */
+		--background: 240 6% 7%;
+		--foreground: 240 5% 90%;
+		--card: 240 6% 9%;
+		--card-foreground: 240 5% 90%;
+		--popover: 240 6% 12%;
+		--popover-foreground: 240 5% 90%;
+		--primary: 217 80% 55%;
+		--primary-foreground: 240 5% 90%;
+		--secondary: 240 5% 15%;
+		--secondary-foreground: 240 5% 90%;
+		--muted: 240 5% 13%;
+		--muted-foreground: 240 4% 42%;
+		--accent: 240 5% 13%;
+		--accent-foreground: 240 5% 90%;
+		--destructive: 0 72% 51%;
+		--destructive-foreground: 240 5% 90%;
+		--border: 240 4% 16%;
+		--input: 240 4% 16%;
+		--ring: 217 80% 55%;
 		--radius: 0.5rem;
 
-		/* Linear sidebar tokens — always dark graphite */
-		--li-bg: 240 6% 9%;
-		--li-bg-hover: 240 5% 13%;
-		--li-bg-active: 240 5% 15%;
-		--li-text: 240 5% 58%;
-		--li-text-bright: 240 5% 90%;
-		--li-text-muted: 240 4% 42%;
-		--li-text-badge: 240 5% 64%;
-		--li-border: 240 4% 16%;
-		--li-divider: 240 4% 14%;
-		--li-badge-bg: 240 5% 18%;
-		--li-dot-green: 142 60% 45%;
-		--li-dot-orange: 28 80% 52%;
-		--li-dot-blue: 217 80% 55%;
-		--li-dot-red: 0 72% 51%;
-		--li-dot-purple: 270 60% 55%;
-		--li-menu-bg: 240 6% 12%;
-		--li-menu-bg-hover: 240 5% 16%;
-		--li-menu-border: 240 4% 18%;
+		/* Minimal app-specific extension layer */
+		--surface-elevated: var(--card);
+		--surface-popover: var(--popover);
+		--surface-hover: var(--accent);
+		--surface-pressed: var(--secondary);
+		--surface-subtle: 240 5% 18%;
+		--text-secondary: 240 5% 58%;
+		--text-badge: 240 5% 64%;
+		--border-subtle: 240 4% 14%;
+		--border-strong: 240 4% 18%;
+		--success: 142 60% 45%;
+		--warning: 28 80% 52%;
+		--info: var(--primary);
+		--danger: var(--destructive);
+		--brand-alt: 270 60% 55%;
 		--li-label-crud: 220 14% 46%;
 		--li-label-feature: 270 50% 50%;
 		--li-label-database: 35 80% 50%;
@@ -52,50 +52,39 @@
 		--li-priority-high: 28 70% 60%;
 		--li-priority-medium: 45 80% 55%;
 		--li-status-progress: 45 90% 50%;
-		--li-status-done: 142 60% 45%;
+		--li-status-done: var(--success);
 
-		/* Content area tokens */
-		--li-content-bg: 240 6% 7%;
-		--li-content-border: 240 4% 14%;
+		/* Compatibility aliases so existing UI keeps its exact structure */
+		--li-bg: var(--surface-elevated);
+		--li-bg-hover: var(--surface-hover);
+		--li-bg-active: var(--surface-pressed);
+		--li-text: var(--text-secondary);
+		--li-text-bright: var(--foreground);
+		--li-text-muted: var(--muted-foreground);
+		--li-text-badge: var(--text-badge);
+		--li-border: var(--border);
+		--li-divider: var(--border-subtle);
+		--li-badge-bg: var(--surface-subtle);
+		--li-dot-green: var(--success);
+		--li-dot-orange: var(--warning);
+		--li-dot-blue: var(--info);
+		--li-dot-red: var(--danger);
+		--li-dot-purple: var(--brand-alt);
+		--li-menu-bg: var(--surface-popover);
+		--li-menu-bg-hover: var(--surface-hover);
+		--li-menu-border: var(--border-strong);
+		--li-content-bg: var(--background);
+		--li-content-border: var(--border-subtle);
 
-		--sidebar-background: 0 0% 98%;
-		--sidebar-foreground: 240 5.3% 26.1%;
-		--sidebar-primary: 240 5.9% 10%;
-		--sidebar-primary-foreground: 0 0% 98%;
-		--sidebar-accent: 240 4.8% 95.9%;
-		--sidebar-accent-foreground: 240 5.9% 10%;
-		--sidebar-border: 220 13% 91%;
-		--sidebar-ring: 217.2 91.2% 59.8%;
-	}
-
-	.dark {
-		--background: 222.2 84% 4.9%;
-		--foreground: 210 40% 98%;
-		--card: 222.2 84% 4.9%;
-		--card-foreground: 210 40% 98%;
-		--popover: 222.2 84% 4.9%;
-		--popover-foreground: 210 40% 98%;
-		--primary: 210 40% 98%;
-		--primary-foreground: 222.2 47.4% 11.2%;
-		--secondary: 217.2 32.6% 17.5%;
-		--secondary-foreground: 210 40% 98%;
-		--muted: 217.2 32.6% 17.5%;
-		--muted-foreground: 215 20.2% 65.1%;
-		--accent: 217.2 32.6% 17.5%;
-		--accent-foreground: 210 40% 98%;
-		--destructive: 0 62.8% 30.6%;
-		--destructive-foreground: 210 40% 98%;
-		--border: 217.2 32.6% 17.5%;
-		--input: 217.2 32.6% 17.5%;
-		--ring: 212.7 26.8% 83.9%;
-		--sidebar-background: 240 5.9% 10%;
-		--sidebar-foreground: 240 4.8% 95.9%;
-		--sidebar-primary: 224.3 76.3% 48%;
-		--sidebar-primary-foreground: 0 0% 100%;
-		--sidebar-accent: 240 3.7% 15.9%;
-		--sidebar-accent-foreground: 240 4.8% 95.9%;
-		--sidebar-border: 240 3.7% 15.9%;
-		--sidebar-ring: 217.2 91.2% 59.8%;
+		/* Sidebar tokens map to the same unified palette */
+		--sidebar-background: var(--card);
+		--sidebar-foreground: var(--foreground);
+		--sidebar-primary: var(--primary);
+		--sidebar-primary-foreground: var(--primary-foreground);
+		--sidebar-accent: var(--accent);
+		--sidebar-accent-foreground: var(--accent-foreground);
+		--sidebar-border: var(--border);
+		--sidebar-ring: var(--ring);
 	}
 }
 
@@ -103,6 +92,27 @@
 	* {
 		@apply border-border;
 	}
+
+	:where(
+		button,
+		[href],
+		input,
+		select,
+		textarea,
+		summary,
+		[role='button'],
+		[tabindex]:not([tabindex='-1'])
+	):focus-visible {
+		outline: none;
+		box-shadow:
+			0 0 0 1px hsl(var(--border-strong)),
+			0 0 0 3px hsl(var(--ring) / 0.22);
+	}
+
+	.focus-ring-none:focus-visible {
+		box-shadow: none;
+	}
+
 	body {
 		@apply bg-background text-foreground;
 	}

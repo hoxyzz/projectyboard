@@ -12,18 +12,19 @@ import {
 	MailOpen,
 	Trash2
 } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type { Notification } from '@/services/types'
 
 import { BulkActionDialog, type BulkActionType } from '@/shared/components/bulk-action-dialog'
 import { Kbd } from '@/shared/components/kbd'
+import { useStructuralNavigation } from '@/shared/hooks/use-structural-navigation'
 import { Checkbox } from '@/shared/components/ui/checkbox'
 import { useNotifications } from '@/domains/inbox/hooks/use-notifications'
 import { type SectionGroup, useListSelection } from '@/shared/hooks/use-list-selection'
 import { cn } from '@/shared/lib/utils'
 import { getNotificationService } from '@/services'
-import { useCounterStore } from '@/shared/stores/counter-store'
+import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
 
 // ─── Helpers ────────────────────────────────────────────
 
@@ -62,28 +63,41 @@ function groupByDate(items: Notification[]): SectionGroup<Notification>[] {
 function NotificationRow({
 	n,
 	isFocused,
+	showFocus,
 	isSelected,
+	navId,
+	tabIndex,
+	registerRef,
 	showCheckbox,
 	onToggleSelect,
 	onToggleRead,
 	onMarkRead,
+	onFocus,
 	onClick
 }: {
 	n: Notification
 	isFocused: boolean
+	showFocus: boolean
 	isSelected: boolean
+	navId: string
+	tabIndex: number
+	registerRef?: (node: HTMLDivElement | null) => void
 	showCheckbox: boolean
 	onToggleSelect: () => void
 	onToggleRead: () => void
 	onMarkRead: () => void
+	onFocus: () => void
 	onClick: () => void
 }) {
 	return (
 		<div
+			ref={registerRef}
+			data-nav-id={navId}
 			className={cn(
 				'flex items-center h-[42px] px-4 border-b border-li-divider transition-colors cursor-pointer group',
 				!n.read && 'bg-li-bg-hover/50',
-				isFocused && 'ring-1 ring-inset ring-li-dot-blue bg-li-bg-hover/30',
+				isFocused && showFocus && 'bg-li-bg-hover ring-1 ring-inset ring-li-dot-blue/45',
+				isFocused && !showFocus && 'bg-li-bg-hover/30',
 				isSelected && 'bg-li-dot-blue/10',
 				!isSelected && !isFocused && 'hover:bg-li-bg-hover'
 			)}
@@ -102,7 +116,8 @@ function NotificationRow({
 					}
 				}
 			}}
-			tabIndex={-1}
+			onFocus={onFocus}
+			tabIndex={tabIndex}
 			role="row"
 			aria-selected={isSelected}
 		>
@@ -113,6 +128,7 @@ function NotificationRow({
 						checked={isSelected}
 						onCheckedChange={onToggleSelect}
 						onClick={(e) => e.stopPropagation()}
+						data-selection-control="true"
 						className="h-3.5 w-3.5 border-li-border data-[state=checked]:bg-li-dot-blue data-[state=checked]:border-li-dot-blue"
 						aria-label={`Select notification: ${n.title}`}
 					/>
@@ -172,8 +188,13 @@ function SectionHeader({
 	count,
 	isOpen,
 	isFocused,
+	showFocus,
+	navId,
+	tabIndex,
+	registerRef,
 	isFullySelected,
 	showCheckbox,
+	onFocus,
 	onToggle,
 	onSelectAll
 }: {
@@ -181,8 +202,13 @@ function SectionHeader({
 	count: number
 	isOpen: boolean
 	isFocused: boolean
+	showFocus: boolean
+	navId: string
+	tabIndex: number
+	registerRef?: (node: HTMLButtonElement | null) => void
 	isFullySelected: boolean
 	showCheckbox: boolean
+	onFocus: () => void
 	onToggle: () => void
 	onSelectAll: () => void
 }) {
@@ -190,7 +216,8 @@ function SectionHeader({
 		<div
 			className={cn(
 				'flex items-center gap-1.5 w-full px-4 py-1.5 transition-colors',
-				isFocused && 'ring-1 ring-inset ring-li-dot-blue bg-li-bg-hover/30'
+				isFocused && showFocus && 'bg-li-bg-hover ring-1 ring-inset ring-li-dot-blue/45',
+				isFocused && !showFocus && 'bg-li-bg-hover/30'
 			)}
 			role="row"
 			tabIndex={-1}
@@ -200,12 +227,17 @@ function SectionHeader({
 					checked={isFullySelected}
 					onCheckedChange={onSelectAll}
 					onClick={(e) => e.stopPropagation()}
+					data-selection-control="true"
 					className="h-3.5 w-3.5 mr-1 border-li-border data-[state=checked]:bg-li-dot-blue data-[state=checked]:border-li-dot-blue"
 					aria-label={`Select all in ${label}`}
 				/>
 			)}
 			<button
+				ref={registerRef}
+				data-nav-id={navId}
 				onClick={onToggle}
+				onFocus={onFocus}
+				tabIndex={tabIndex}
 				className="flex items-center gap-1.5 text-[11px] font-medium text-li-text-muted uppercase tracking-wider hover:text-li-text-bright transition-colors"
 				aria-expanded={isOpen}
 			>
@@ -236,8 +268,7 @@ export function InboxView() {
 	const qc = useQueryClient()
 	const [filter, setFilter] = useState<'all' | 'unread'>('all')
 	const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set())
-	const listRef = useRef<HTMLDivElement>(null)
-	const setCount = useCounterStore((s) => s.setCount)
+	const [listHasFocus, setListHasFocus] = useState(false)
 
 	// Bulk action dialog state
 	const [dialogOpen, setDialogOpen] = useState(false)
@@ -250,17 +281,41 @@ export function InboxView() {
 	)
 
 	const groups = useMemo(() => groupByDate(filtered), [filtered])
+	const totalCount = notifications.length
+	const visibleCount = filtered.length
 	const unreadCount = notifications.filter((n) => !n.read).length
-
-	useEffect(() => {
-		setCount('inbox', unreadCount)
-	}, [unreadCount, setCount])
+	const navEntries = useMemo(
+		() =>
+			groups.flatMap((group) => [
+				`section:${group.id}`,
+				...group.items.map((notification) => `notification:${notification.id}`)
+			]),
+		[groups]
+	)
 
 	// Multi-selection hook with hierarchical navigation
 	const selection = useListSelection({
 		groups,
 		getItemId: (n) => n.id
 	})
+	const {
+		activeNavId,
+		setActiveNavId,
+		registerNavRef,
+		focusNav,
+		getTabIndex,
+		handleStructuralKeyDownCapture
+	} = useStructuralNavigation({ navIds: navEntries })
+
+	const restoreListFocus = useCallback(() => {
+		requestAnimationFrame(() => {
+			focusNav(activeNavId ?? navEntries[0] ?? null)
+		})
+	}, [activeNavId, focusNav, navEntries])
+
+	useEffect(() => {
+		restoreListFocus()
+	}, [restoreListFocus])
 
 	const showCheckboxes = selection.hasSelection
 
@@ -308,6 +363,7 @@ export function InboxView() {
 		} finally {
 			setIsProcessing(false)
 			setDialogOpen(false)
+			restoreListFocus()
 		}
 	}
 
@@ -321,6 +377,7 @@ export function InboxView() {
 		} finally {
 			setIsProcessing(false)
 			setDialogOpen(false)
+			restoreListFocus()
 		}
 	}
 
@@ -334,6 +391,7 @@ export function InboxView() {
 		} finally {
 			setIsProcessing(false)
 			setDialogOpen(false)
+			restoreListFocus()
 		}
 	}
 
@@ -342,6 +400,18 @@ export function InboxView() {
 		await svc.markAllAsRead?.()
 		qc.invalidateQueries({ queryKey: ['notifications'] })
 	}, [qc])
+
+	useRouteShortcuts({
+		onFocusList: restoreListFocus,
+		onJumpToIndex: (index) => {
+			const target = filtered[index]
+			if (!target) return
+			focusNav(`notification:${target.id}`)
+		},
+		onMarkAllRead: unreadCount > 0 ? markAllAsRead : undefined,
+		onFilterAll: () => setFilter('all'),
+		onFilterUnread: () => setFilter('unread')
+	})
 
 	// Get the IDs that the action should apply to
 	const getActionTargetIds = useCallback((): string[] => {
@@ -423,6 +493,10 @@ export function InboxView() {
 
 	const handleListKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
+			if ((e.target as HTMLElement).closest('[data-selection-control="true"]')) {
+				return
+			}
+
 			// Let selection hook handle arrow keys, space, escape
 			selection.handleKeyDown(e)
 
@@ -501,15 +575,15 @@ export function InboxView() {
 	const actionTargetCount = getActionTargetIds().length
 
 	return (
-		<div className="flex-1 flex flex-col bg-li-content-bg min-h-0">
+		<div className="relative flex-1 flex flex-col bg-li-content-bg min-h-0">
 			{/* Header */}
 			<div className="flex items-center justify-between h-11 px-4 border-b border-li-content-border shrink-0">
 				<div className="flex items-center gap-2">
 					<InboxIcon className="h-4 w-4 text-li-text-muted" />
 					<span className="text-[14px] font-medium text-li-text-bright">Inbox</span>
-					{unreadCount > 0 && (
+					{visibleCount > 0 && (
 						<span className="text-[10px] bg-li-dot-blue text-li-text-bright rounded-full px-1.5 py-0.5 font-medium">
-							{unreadCount}
+							{visibleCount}
 						</span>
 					)}
 				</div>
@@ -524,6 +598,7 @@ export function InboxView() {
 						)}
 					>
 						All
+						<span className="text-[10px] text-li-text-badge">{totalCount}</span>
 						<Kbd keys={['1']} />
 					</button>
 					<button
@@ -536,6 +611,7 @@ export function InboxView() {
 						)}
 					>
 						Unread
+						<span className="text-[10px] text-li-text-badge">{unreadCount}</span>
 						<Kbd keys={['2']} />
 					</button>
 					{unreadCount > 0 && !selection.hasSelection && (
@@ -549,52 +625,6 @@ export function InboxView() {
 					)}
 				</div>
 			</div>
-
-			{/* Selection toolbar */}
-			{selection.hasSelection && (
-				<div className="flex items-center gap-3 px-4 py-2 border-b border-li-content-border bg-li-bg-hover/50 shrink-0">
-					<span className="text-[12px] text-li-text-bright font-medium">
-						{selection.selectionCount} selected
-					</span>
-					<div className="flex items-center gap-1 ml-auto">
-						<button
-							onClick={() => openBulkDialog('markRead')}
-							className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-bg-hover"
-							title="Mark selected as read (R)"
-						>
-							<MailOpen className="h-3.5 w-3.5" />
-							Read
-							<Kbd keys={['R']} />
-						</button>
-						<button
-							onClick={() => openBulkDialog('markUnread')}
-							className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-bg-hover"
-							title="Mark selected as unread (U)"
-						>
-							<Mail className="h-3.5 w-3.5" />
-							Unread
-							<Kbd keys={['U']} />
-						</button>
-						<button
-							onClick={() => openBulkDialog('destroy')}
-							className="flex items-center gap-1.5 text-[12px] text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
-							title="Delete selected (Backspace)"
-						>
-							<Trash2 className="h-3.5 w-3.5" />
-							Delete
-							<Kbd keys={['⌫']} />
-						</button>
-						<button
-							onClick={() => selection.clearSelection()}
-							className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-bg-hover ml-2"
-							title="Clear selection (Esc)"
-						>
-							Clear
-							<Kbd keys={['Esc']} />
-						</button>
-					</div>
-				</div>
-			)}
 
 			{/* Keyboard hints */}
 			<div className="flex items-center gap-3 px-4 py-1.5 border-b border-li-divider text-[10px] text-li-text-muted shrink-0">
@@ -614,10 +644,15 @@ export function InboxView() {
 
 			{/* Content */}
 			<div
-				ref={listRef}
 				className="flex-1 overflow-auto outline-none"
-				tabIndex={0}
 				onKeyDown={handleListKeyDown}
+				onKeyDownCapture={handleStructuralKeyDownCapture}
+				onFocusCapture={() => setListHasFocus(true)}
+				onBlurCapture={(e) => {
+					if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+						setListHasFocus(false)
+					}
+				}}
 				role="grid"
 				aria-label="Notifications list"
 				aria-multiselectable="true"
@@ -646,8 +681,19 @@ export function InboxView() {
 									count={group.items.length}
 									isOpen={!isCollapsed}
 									isFocused={isSectionFocused}
+									showFocus={listHasFocus}
+									navId={`section:${group.id}`}
+									tabIndex={getTabIndex(`section:${group.id}`)}
+									registerRef={registerNavRef(`section:${group.id}`)}
 									isFullySelected={isFullySelected}
 									showCheckbox={showCheckboxes}
+									onFocus={() => {
+										selection.setFocus({
+											type: 'section',
+											sectionIndex
+										})
+										setActiveNavId(`section:${group.id}`)
+									}}
 									onToggle={() => toggleSection(group.id)}
 									onSelectAll={() => handleSectionSelectAll(sectionIndex)}
 								/>
@@ -660,13 +706,25 @@ export function InboxView() {
 												sectionIndex,
 												itemIndex
 											)}
+											showFocus={listHasFocus}
 											isSelected={selection.isSelected(n.id)}
+											navId={`notification:${n.id}`}
+											tabIndex={getTabIndex(`notification:${n.id}`)}
+											registerRef={registerNavRef(`notification:${n.id}`)}
 											showCheckbox={showCheckboxes}
 											onToggleSelect={() =>
 												selection.toggleItem(sectionIndex, itemIndex)
 											}
 											onToggleRead={() => toggleRead(n.id, n.read)}
 											onMarkRead={() => markAsRead(n.id)}
+											onFocus={() => {
+												selection.setFocus({
+													type: 'item',
+													sectionIndex,
+													itemIndex
+												})
+												setActiveNavId(`notification:${n.id}`)
+											}}
 											onClick={() =>
 												selection.focusItemOnly(sectionIndex, itemIndex)
 											}
@@ -679,9 +737,59 @@ export function InboxView() {
 			</div>
 
 			{/* Bulk action confirmation dialog */}
+			{selection.hasSelection && (
+				<div className="pointer-events-none absolute bottom-4 right-4 z-20">
+					<div className="pointer-events-auto flex items-center gap-3 rounded-xl border border-li-menu-border bg-li-menu-bg/95 px-3 py-2 shadow-2xl backdrop-blur-sm">
+						<span className="text-[12px] text-li-text-bright font-medium">
+							{selection.selectionCount} selected
+						</span>
+						<div className="flex items-center gap-1">
+							<button
+								onClick={() => openBulkDialog('markRead')}
+								className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-menu-bg-hover"
+								title="Mark selected as read (R)"
+							>
+								<MailOpen className="h-3.5 w-3.5" />
+								Read
+								<Kbd keys={['R']} />
+							</button>
+							<button
+								onClick={() => openBulkDialog('markUnread')}
+								className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-menu-bg-hover"
+								title="Mark selected as unread (U)"
+							>
+								<Mail className="h-3.5 w-3.5" />
+								Unread
+								<Kbd keys={['U']} />
+							</button>
+							<button
+								onClick={() => openBulkDialog('destroy')}
+								className="flex items-center gap-1.5 text-[12px] text-red-400 hover:text-red-300 transition-colors px-2 py-1 rounded hover:bg-red-500/10"
+								title="Delete selected (Backspace)"
+							>
+								<Trash2 className="h-3.5 w-3.5" />
+								Delete
+								<Kbd keys={['⌫']} />
+							</button>
+							<button
+								onClick={() => selection.clearSelection()}
+								className="flex items-center gap-1.5 text-[12px] text-li-text-muted hover:text-li-text-bright transition-colors px-2 py-1 rounded hover:bg-li-menu-bg-hover ml-2"
+								title="Clear selection (Esc)"
+							>
+								Clear
+								<Kbd keys={['Esc']} />
+							</button>
+						</div>
+					</div>
+				</div>
+			)}
+
 			<BulkActionDialog
 				open={dialogOpen}
-				onOpenChange={setDialogOpen}
+				onOpenChange={(open) => {
+					setDialogOpen(open)
+					if (!open) restoreListFocus()
+				}}
 				actionType={dialogAction}
 				itemCount={actionTargetCount}
 				onConfirm={handleConfirm}

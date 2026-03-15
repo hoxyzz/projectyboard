@@ -1,5 +1,5 @@
 import { ArrowUpDown, ChevronDown, ChevronRight, Filter, Plus } from 'lucide-react'
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import type { Issue, IssueStatus, Priority } from '@/domains/issues/types'
 
@@ -13,10 +13,10 @@ import {
 	DropdownMenuTrigger
 } from '@/shared/components/ui/dropdown-menu'
 import { useIssues, useUpdateIssue } from '@/domains/issues/hooks/use-issues'
+import { useStructuralNavigation } from '@/shared/hooks/use-structural-navigation'
 import { useNavigate } from '@/shared/lib/navigation'
 import { cn } from '@/shared/lib/utils'
 import { useRouteShortcuts } from '@/shell/hooks/use-route-shortcuts'
-import { useCounterStore } from '@/shared/stores/counter-store'
 
 import { CreateIssueModal } from './create-issue-modal'
 import {
@@ -31,9 +31,6 @@ import {
 
 type SortField = 'priority' | 'status' | 'title' | 'updatedAt'
 type SortDir = 'asc' | 'desc'
-
-/** Default tracked status for My Issues counter */
-const TRACKED_STATUSES: IssueStatus[] = ['in_progress']
 
 const PRIORITY_ORDER: Record<Priority, number> = {
 	urgent: 0,
@@ -57,6 +54,10 @@ type IssueRowProps = {
 	issue: Issue
 	expanded: boolean
 	focused: boolean
+	navId: string
+	tabIndex: number
+	rowRef?: (node: HTMLDivElement | null) => void
+	onFocus: () => void
 	onToggle: () => void
 	onStatusChange: (issue: Issue, status: IssueStatus) => void
 	onPriorityChange: (issue: Issue, priority: Priority) => void
@@ -67,6 +68,10 @@ function IssueRow({
 	issue,
 	expanded,
 	focused,
+	navId,
+	tabIndex,
+	rowRef,
+	onFocus,
 	onToggle,
 	onStatusChange,
 	onPriorityChange,
@@ -75,14 +80,27 @@ function IssueRow({
 	return (
 		<>
 			<div
+				ref={rowRef}
+				data-nav-id={navId}
 				className={cn(
-					'flex items-center h-[34px] px-4 hover:bg-li-bg-hover transition-colors cursor-pointer group',
+					'flex items-center h-[34px] px-4 hover:bg-li-bg-hover transition-colors cursor-pointer group outline-none',
 					!expanded && 'border-b border-li-divider',
 					expanded && 'bg-li-bg-hover/60',
-					focused && 'ring-1 ring-inset ring-li-dot-blue bg-li-bg-hover'
+					focused && 'bg-li-bg-hover ring-1 ring-inset ring-li-dot-blue/35'
 				)}
 				onClick={onToggle}
-				tabIndex={-1}
+				onFocus={onFocus}
+				onFocusCapture={onFocus}
+				onKeyDown={(e) => {
+					if (e.target !== e.currentTarget) return
+					if (e.key === 'Enter' || e.key === ' ') {
+						e.preventDefault()
+						onToggle()
+					}
+				}}
+				tabIndex={tabIndex}
+				role="button"
+				aria-expanded={expanded}
 			>
 				<div className="flex items-center gap-2.5 flex-1 min-w-0">
 					<ChevronRight
@@ -159,6 +177,8 @@ function IssueRow({
 			<IssueDetailPanel
 				issue={issue}
 				expanded={expanded}
+				navParentId={navId}
+				onFocusWithin={onFocus}
 				onOpenFull={onOpenFull}
 				onStatusChange={onStatusChange}
 				onPriorityChange={onPriorityChange}
@@ -303,33 +323,12 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 	const [sortDir, setSortDir] = useState<SortDir>('asc')
 	const [createOpen, setCreateOpen] = useState(false)
 	const [expandedId, setExpandedId] = useState<string | null>(null)
-	const [focusedIdx, setFocusedIdx] = useState(-1)
 	const navigate = useNavigate()
-	const listRef = useRef<HTMLDivElement>(null)
-	const setCount = useCounterStore((s) => s.setCount)
 
 	const { data, isLoading } = useIssues()
 	const updateIssue = useUpdateIssue()
 
-	// Push "in_progress" issue count to sidebar counter store
 	const allIssues = useMemo(() => data?.data ?? [], [data?.data])
-	const trackedCount = useMemo(
-		() => allIssues.filter((i) => TRACKED_STATUSES.includes(i.status)).length,
-		[allIssues]
-	)
-	useEffect(() => {
-		setCount('my-issues', trackedCount)
-	}, [trackedCount, setCount])
-
-	// ─── Route shortcuts ────────────────────────────────
-	useRouteShortcuts({
-		onNew: () => setCreateOpen(true),
-		onOpen: () => {
-			if (focusedIdx >= 0 && flatIssues[focusedIdx]) {
-				navigate(`/issues/${flatIssues[focusedIdx].id}`)
-			}
-		}
-	})
 
 	const issues = useMemo(() => {
 		let result = allIssues
@@ -358,43 +357,6 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 		return result
 	}, [allIssues, statusFilter, priorityFilter, sortField, sortDir])
 
-	const flatIssues = useMemo(() => {
-		const groups: Record<string, Issue[]> = {}
-		for (const issue of issues) {
-			if (!groups[issue.status]) groups[issue.status] = []
-			groups[issue.status].push(issue)
-		}
-		const sorted = Object.entries(groups).sort(
-			([a], [b]) => STATUS_ORDER[a as IssueStatus] - STATUS_ORDER[b as IssueStatus]
-		)
-		return sorted.flatMap(([, g]) => g)
-	}, [issues])
-
-	const clampIdx = useCallback(
-		(idx: number) => Math.max(0, Math.min(idx, flatIssues.length - 1)),
-		[flatIssues.length]
-	)
-
-	const handleListKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (e.key === 'ArrowDown' || e.key === 'j') {
-				e.preventDefault()
-				setFocusedIdx((i) => clampIdx(i + 1))
-			} else if (e.key === 'ArrowUp' || e.key === 'k') {
-				e.preventDefault()
-				setFocusedIdx((i) => clampIdx(i - 1))
-			} else if (e.key === 'Enter' && focusedIdx >= 0 && flatIssues[focusedIdx]) {
-				e.preventDefault()
-				navigate(`/issues/${flatIssues[focusedIdx].id}`)
-			} else if (e.key === ' ' && focusedIdx >= 0 && flatIssues[focusedIdx]) {
-				e.preventDefault()
-				const issue = flatIssues[focusedIdx]
-				setExpandedId(expandedId === issue.id ? null : issue.id)
-			}
-		},
-		[focusedIdx, flatIssues, clampIdx, navigate, expandedId]
-	)
-
 	const handleStatusChange = (issue: Issue, status: IssueStatus) => {
 		updateIssue.mutate({ id: issue.id, input: { status } })
 	}
@@ -414,6 +376,41 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 		)
 	}, [issues])
 
+	const navEntries = useMemo(
+		() =>
+			grouped.flatMap(([status, groupIssues]) => [
+				`section:${status}`,
+				...groupIssues.map((issue) => `issue:${issue.id}`)
+			]),
+		[grouped]
+	)
+	const {
+		activeNavId,
+		setActiveNavId,
+		registerNavRef,
+		focusNav,
+		getTabIndex,
+		handleStructuralKeyDownCapture
+	} = useStructuralNavigation({ navIds: navEntries })
+	const activeIssueId =
+		activeNavId?.startsWith('issue:') ? activeNavId.replace('issue:', '') : null
+
+	// ─── Route shortcuts ────────────────────────────────
+	useRouteShortcuts({
+		onNew: () => setCreateOpen(true),
+		onFocusList: () => focusNav(activeNavId ?? navEntries[0] ?? null),
+		onJumpToIndex: (index) => {
+			const target = issues[index]
+			if (!target) return
+			focusNav(`issue:${target.id}`)
+		},
+		onOpen: () => {
+			if (activeIssueId) {
+				navigate(`/issues/${activeIssueId}`)
+			}
+		}
+	})
+
 	if (isLoading) {
 		return (
 			<div className="flex-1 flex items-center justify-center bg-li-content-bg">
@@ -423,8 +420,6 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 	}
 
 	const activeFilters = statusFilter.length + priorityFilter.length
-
-	let flatIndex = 0
 
 	return (
 		<div className="flex-1 flex flex-col bg-li-content-bg min-h-0">
@@ -472,13 +467,8 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 
 			{/* Content */}
 			<div
-				ref={listRef}
 				className="flex-1 overflow-auto outline-none"
-				tabIndex={0}
-				onKeyDown={handleListKeyDown}
-				onFocus={() => {
-					if (focusedIdx < 0 && flatIssues.length > 0) setFocusedIdx(0)
-				}}
+				onKeyDownCapture={handleStructuralKeyDownCapture}
 			>
 				{grouped.length === 0 ? (
 					<div className="flex-1 flex items-center justify-center py-20">
@@ -492,7 +482,17 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 						return (
 							<div key={status}>
 								<div className="flex items-center h-[30px] px-4 sticky top-0 bg-li-content-bg z-10">
-									<div className="flex items-center gap-2">
+									<button
+										ref={registerNavRef(`section:${status}`)}
+										type="button"
+										data-nav-id={`section:${status}`}
+										onFocus={() => setActiveNavId(`section:${status}`)}
+										tabIndex={getTabIndex(`section:${status}`)}
+										className={cn(
+											'flex items-center gap-2 rounded px-1.5 py-0.5 outline-none transition-colors',
+											activeNavId === `section:${status}` && 'bg-li-bg-hover'
+										)}
+									>
 										<span
 											className="h-2 w-2 rounded-full"
 											style={{ backgroundColor: statusOpt?.color }}
@@ -503,16 +503,19 @@ export function IssuesView({ onIssueSelect: _onIssueSelect }: IssuesViewProps) {
 										<span className="text-[11px] text-li-text-muted">
 											{groupIssues.length}
 										</span>
-									</div>
+									</button>
 								</div>
 								{groupIssues.map((issue) => {
-									const myIdx = flatIndex++
 									return (
 										<IssueRow
 											key={issue.id}
 											issue={issue}
 											expanded={expandedId === issue.id}
-											focused={focusedIdx === myIdx}
+											focused={activeNavId === `issue:${issue.id}`}
+											navId={`issue:${issue.id}`}
+											tabIndex={getTabIndex(`issue:${issue.id}`)}
+											rowRef={registerNavRef(`issue:${issue.id}`)}
+											onFocus={() => setActiveNavId(`issue:${issue.id}`)}
 											onToggle={() =>
 												setExpandedId(
 													expandedId === issue.id ? null : issue.id
