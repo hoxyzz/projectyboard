@@ -14,10 +14,18 @@ import type { IssueRepository } from "./ports/issue-repository";
 import type { ProjectRepository } from "./ports/project-repository";
 import type { LabelRepository } from "./ports/label-repository";
 
-// Adapters
+// Adapters - Mock (for testing/fallback)
 import { MockIssueRepository } from "./adapters/mock/issue-repository";
 import { MockProjectRepository } from "./adapters/mock/project-repository";
 import { MockLabelRepository } from "./adapters/mock/label-repository";
+
+// Adapters - Database (production)
+import { DbIssueRepository } from "./adapters/db/issue-repository";
+import { DbProjectRepository } from "./adapters/db/project-repository";
+import { DbLabelRepository } from "./adapters/db/label-repository";
+
+// Environment check
+const USE_DATABASE = process.env.DATABASE_URL !== undefined;
 
 // Use Cases
 import { CreateIssueUseCase } from "./application/issues/create";
@@ -77,24 +85,27 @@ class Container {
 
   getIssueRepository(): IssueRepository {
     if (!this.issueRepository) {
-      // TODO: Switch to real adapter based on environment
-      this.issueRepository = new MockIssueRepository();
+      this.issueRepository = USE_DATABASE
+        ? new DbIssueRepository()
+        : new MockIssueRepository();
     }
     return this.issueRepository;
   }
 
   getProjectRepository(): ProjectRepository {
     if (!this.projectRepository) {
-      // TODO: Switch to real adapter based on environment
-      this.projectRepository = new MockProjectRepository();
+      this.projectRepository = USE_DATABASE
+        ? new DbProjectRepository()
+        : new MockProjectRepository();
     }
     return this.projectRepository;
   }
 
   getLabelRepository(): LabelRepository {
     if (!this.labelRepository) {
-      // TODO: Switch to real adapter based on environment
-      this.labelRepository = new MockLabelRepository();
+      this.labelRepository = USE_DATABASE
+        ? new DbLabelRepository()
+        : new MockLabelRepository();
     }
     return this.labelRepository;
   }
